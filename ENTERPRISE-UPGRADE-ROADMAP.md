@@ -1,209 +1,121 @@
-# SMGTEC Enterprise Pricing Engine — Improvement Roadmap
+# SMGTEC Internal Pricing Engine — Build vs Buy & Improvement Plan
 
 **Date:** 2026-06-04
-**Status:** Research & Planning Complete
-**Current:** Single-file HTML/JS pricing calculator (3 tiers, real-time margin calc, SLA exposure, Spanish deposit compliance)
-**Target:** Multi-tenant enterprise MSP pricing & quoting platform
+**Purpose:** Help SMGTEC decide whether to keep building their own internal pricing calculator, and what to improve if they do.
 
 ---
 
-## 1. Current Feature Inventory (baseline)
+## 1. What This Calculator Does (and Why It Exists)
 
-| Feature | Status | Details |
-|---------|--------|---------|
-| 3-Tier Pricing Model | ✅ Live | T1: Data Protection, T2: Active Perimeter, T3: Fully Protected |
-| Real-Time Margin Calculation | ✅ Live | Setup, Monthly Y1/Y2, Aggregate Y1 with color thresholds (50%) |
-| Hardware Cost Database | ✅ Live | FortiGate, Dell servers, Datto Siris, APC UPS, cabling — wholesale/retail pairs |
-| Licensing Cost Database | ✅ Live | M365, VoIP, ESET, S1, N-Central, IT Glue, BACKBLAZE, MSP360, FortiGuard |
-| M365 Sourcing Toggle | ✅ Live | Business Standard vs Premium, wholesale vs retail pass-through |
-| VoIP Toggle | ✅ Live | Per-user costing with wholesale/retail |
-| Hardware Add-ons | ✅ Live | Switch, UPS, printers (B&W + color) |
-| SLA Penalty Exposure | ✅ Live | T2 at 10%, T3 at 15% of monthly recurring |
-| Spanish 50% Deposit Rule | ✅ Live | Upfront hardware payment compliance |
-| 10-Workstation Minimum Billing | ✅ Live | Auto-scaling with warning banner |
-| Pricing Manual Overrides | ✅ Live | Per-tier setup + monthly overrides |
-| Tailwind UI (CDN) | ✅ Live | Clean dark theme with brand colors (smg_dark, smg_cream, smg_gold) |
-| Labor Standard (€40/hr) | ✅ Live | Hardcoded internal + retail rates |
+SMGTEC's internal tool is used by the **sales team** to:
+
+- Calculate internal cost to deliver (hardware wholesale + licensing cost + labor)
+- Generate 3 service tiers (T1 Data Protection → T3 Fully Protected)
+- Ensure margins stay above 50% (with real-time visual feedback)
+- Account for Spanish regulation (50% hardware deposit upfront)
+- Override prices manually per client when needed
+
+It's a **margin guardrail tool**, not a quote generator. The sales team uses it to know the floor they can negotiate from.
 
 ---
 
-## 2. Competitor Landscape (Top 10 MSP Pricing Tools)
+## 2. Build vs Buy: Should SMGTEC Use a Commercial Tool?
 
-### Tier 1 — Enterprise CPQ / PSA-Native
+A quick honest comparison of what commercial quoting tools offer vs. the custom calculator:
 
-| Tool | Pricing | Strengths | Weaknesses |
-|------|---------|-----------|------------|
-| **QuoteWerks** | $15–30/user/mo | 100+ distributor catalogs, real-time pricing, hardware-heavy quoting | Desktop app (legacy), poor UX, no AI |
-| **ConnectWise CPQ (Sell)** | $50–85/user/mo | Deep PSA ecosystem, CRM integration, quote templates | Being sunset, 2-3 month implementation, over-engineered |
-| **Kaseya Quote Manager** | Bundled with Kaseya | Real-time distributor pricing, procurement automation, e-commerce flow | Complete vendor lock-in, ecosystem-only |
-| **HaloPSA** | $35–109/agent/mo | Modern UI, transparent pricing, deep configurability, PSA-native quoting | Separate RMM needed, steep learning curve for config |
+| Need | SMGTEC Custom Tool | Commercial (Quoter, QuoteWerks, Zomentum) |
+|------|-------------------|------------------------------------------|
+| Cost to acquire | €0 (built in-house) | €149–$569/mo (Quoter), $15–85/user (QuoteWerks) |
+| Training time | None (already use it) | Days to weeks per sales rep |
+| Spanish-specific (IVA, 50% deposit, LOPDGDD) | ✅ Built in | ❌ None support Spanish regulation out of box |
+| Distributor price integration | ❌ Manual DB | ✅ QuoteWerks has 100+ catalogs |
+| PDF proposals | ❌ Not yet | ✅ Built-in templates |
+| Client history | ❌ Not yet | ✅ CRM-like database |
+| Margin control | ✅ Hardcoded thresholds | ❌ Generic, no automated guardrails |
+| SLA risk visibility | ✅ Built-in | ❌ Not a standard feature |
+| Internet required | ❌ No (runs offline) | ✅ Usually cloud |
 
-### Tier 2 — Cloud-Native Quoting & Proposals
+### Verdict for SMGTEC: Keep building
 
-| Tool | Pricing | Strengths | Weaknesses |
-|------|---------|-----------|------------|
-| **Quoter (ScalePad)** | $149–569/mo | Cloud-native, modern UX, fast proposals, distributor integrations | Quote caps per tier, limited AI, hardware-heavy focus |
-| **Zomentum** | $99–199/user/mo | AI-powered, sales enablement + quoting, MRR tracking, pipeline | Less known, smaller ecosystem, integration depth |
-
-### Tier 3 — Analytics & Intelligence (Complementary)
-
-| Tool | Pricing | Focus | Relevance |
-|------|---------|-------|-----------|
-| **Analytify.ai** | ~$1.5K–5K/mo | MSP BI, semantic layer, embedded client portals | Not a quoter — analytics overlay for profitability tracking |
-| **MSPCFO** | ~$2K–4K/mo | Client profitability analytics, SLA scorecards, automated insights | Reporting layer, no quoting |
-| **Scopable** | Free (alpha) | AI scoping from PSA data, risk assessments | Newest; AI-first approach worth watching |
-
-### Tier 4 — Free / Lightweight Calculators
-
-| Tool | Pricing | Notes |
-|------|---------|-------|
-| **NinjaOne Pricing Calc** | Free Excel | COLA factor, security stack, Spanish landing page exists |
-| **CalculaFast** | Free web | Margin modeling, support hour stress testing |
+A commercial tool would cost €150–600+/mo, lack Spanish regulation support, and force your sales team to learn a new system. The custom tool is already better at the things that matter for your specific market and margins. The question is **what to add next**.
 
 ---
 
-## 3. Gap Analysis: SMGTEC vs Enterprise Competitors
+## 3. What to Learn from Commercial Tools (Feature Borrowing)
 
-### Critical Gaps (must-have for enterprise upgrade)
+Here are the features from commercial quoting tools that would directly help SMGTEC's sales team, ordered by impact:
 
-| # | Capability | Gap Severity | Competitor Baseline |
-|---|-----------|-------------|---------------------|
-| 1 | **Client portfolio management** (multi-client, search, history) | 🔴 Critical | All PSA tools have this |
-| 2 | **Data persistence** (localStorage → indexed DB → cloud) | 🔴 Critical | Even free tools save state |
-| 3 | **PDF proposal generation** (branded, line-item, Spanish legal format) | 🔴 Critical | Quoter, QuoteWerks, Zomentum all do this |
-| 4 | **IVA (VAT) handling** (21% Spanish IVA, reverse charge, exempt) | 🟠 High | Required by Spanish law |
-| 5 | **LOPDGDD/RGPD compliance module** (DPO cost, data audit, AEPD risk) | 🟠 High | No competitor does this — potential moat |
-| 6 | **Multi-language interface** (ES/EN/CAT) | 🟠 High | Spanish MSPs operate bilingually |
-| 7 | **Labor truly-loaded cost** (salary + SS + IRPF + training + tools) | 🟠 High | Currently hardcoded €40/hr, not modeled |
-| 8 | **Export / shareable links** (URL state encoding or export JSON) | 🟠 High | Quoter generates shareable proposal links |
-| 9 | **Profitability analytics / dashboards** (trends, per-client P&L) | 🟠 High | Analytify, MSPCFO core offering |
-| 10 | **NIS2 compliance tracking** (18 mandatory sectors, Article 23/24) | 🟠 High | New EU directive — first-mover opportunity |
-
-### Secondary Gaps (competitive differentiators)
-
-| # | Capability | Gap Severity | Notes |
-|---|-----------|-------------|-------|
-| 11 | **Scenario / what-if modeling** (Monte Carlo, best/worst case) | 🟡 Medium | CalculaFast does basic version |
-| 12 | **API / integration layer** (PSA, RMM, CRM webhooks) | 🟡 Medium | ConnectWise, Halo PSA have mature APIs |
-| 13 | **Multi-currency** (EUR default, USD/GBP for hardware sourcing) | 🟡 Medium | Needed for distributor price comparison |
-| 14 | **Collaboration / approval workflow** (sales → ops → director) | 🟡 Medium | QuoteWerks has this |
-| 15 | **Client-facing portal / self-service quotes** | 🟡 Medium | ScalePad, Zomentum offer this |
-| 16 | **vCIO roadmap generation** (strategic planning outputs from data) | 🟢 Low | Scopable touches this — differentiator |
-| 17 | **AI-powered scoping** (natural language → tier recommendation) | 🟢 Low | Scopable alpha feature |
-| 18 | **Integrator/distributor price feeds** (Ingram, Tech Data, etc.) | 🟢 Low | QuoteWerks strongest here, not realistic short-term |
+| Borrow From | Feature | Why SMGTEC Needs It |
+|-------------|---------|---------------------|
+| **Quoter/ScalePad** | Branded PDF proposals | Sales team currently builds proposals manually after calculating. Auto-generating them saves hours per client. |
+| **Zomentum** | MRR tracking per client | Knowing total recurring revenue across all clients helps prioritize sales effort. |
+| **QuoteWerks** | Distributor price sync | Manually updating FortiGate/Dell costs is error-prone. An API feed would keep margins accurate. |
+| **Halo PSA** | Client notes & history log | Remembering past quote adjustments per client avoids renegotiating from scratch. |
+| **All of them** | Quick-share link | Sales can email a web link instead of explaining numbers over the phone. |
 
 ---
 
-## 4. Spanish Market Context
+## 4. Spanish MSP Market — Pricing Reality Check
 
-### Regulatory Landscape (Opportunity to Build Moat)
+Since the calculator prices actual SMGTEC clients, the question isn't "who competes with the calculator" but "how does SMGTEC's pricing compare to other Spanish MSPs?"
 
-| Regulation | Scope | Penalty | Application |
-|-----------|-------|---------|-------------|
-| **RGPD (EU 2016/679)** | All EU data processing | Up to €20M or 4% global turnover | Every client with employee/ customer data |
-| **LOPDGDD 3/2018** | Spanish implementation of RGPD | Fines + AEPD enforcement | CCTVs, geolocation, biometrics, digital disconnection |
-| **ENS (RD 311/2022)** | Public sector & government contractors | Loss of contract, exclusion from public tenders | Critical for SMGTEC government clients |
-| **NIS2 (Directive 2022/2555)** | 18 critical sectors (energy, transport, health, digital infra, etc.) | Fines, liability, mandatory reporting | Security obligations — complements Tier 2/3 stack |
-| **50% Deposit Law (Ley de Contratos)** | B2B hardware procurement | Civil liability | Already implemented in calculator |
+| Factor | SMGTEC Calculator | Spanish MSP Average | Notes |
+|--------|-------------------|--------------------|------|
+| **Labor rate** | €40/hr internal (€100/hr billed) | €40–55/hr | Your internal cost rate is standard for Spain. Billed rate looks competitive. |
+| **Per-user pricing** | €10–50/user/mo (T1–T3 tiers) | Common model in Spain | Aligned with market norms. |
+| **Tier 1 monthly** | ~€249–299/mo (10 users) | Typical entry-level | On the lower end — possibly leaving margin on the table. |
+| **Tier 3 monthly** | ~€500–999/mo (10 users) | €800–1,500/mo for full stack | Your T3 may be under-priced for the stack you're delivering (Datto + FortiGate + N-Central + S1 + IT Glue). |
+| **Hardware markup** | ~55–70% (wholesale→retail) | 40–60% standard | Your markup is healthy. |
+| **50% deposit** | ✅ Built in | Common but not universal | You have an edge — protects cash flow legally. |
 
-### Market Data
-- Spain MSP market: ~€7.2B (2024), growing 5.22% CAGR
-- Average billing: ~€40–55/hr (matches current calculator)
-- Per-user pricing is the norm (vs. per-device in US)
-- IVA (VAT): 21% standard, 10% reduced (some IT services)
-
-### Competitive Positioning
-- **No competitor** currently offers an integrated RGPD/LOPDGDD compliance cost calculator
-- **No competitor** automates NIS2 readiness cost estimation
-- **ENS** compliance is mandatory for Spanish public sector — SMGTEC has government clients
-- This regulatory gap is a **sustainable moat**, not a feature toggle
+**Observation:** T3 may be under-priced relative to the tech stack you're bundling. Worth checking against actual delivery costs.
 
 ---
 
-## 5. Recommended Architecture (Phase 0–3)
+## 5. Practical Improvement Plan (What Actually Helps the Sales Team)
 
-### Phase 0 — Immediate (Single-Week)
-_Focus: Zero-dependency improvements to existing single-file app_
+### Immediate (this week) — Pain Points the Sales Team Feels Now
 
-- [ ] **localStorage persistence** — save/load calculator state across sessions
-- [ ] **Export to JSON / URL sharing** — encode state in URL hash for quick sharing
-- [ ] **IVA toggles** — 21% / 10% / exempt with live "with tax" column
-- [ ] **Multi-language strings** — ES/EN via simple JSON object swap
-- [ ] **Fully-loaded labor model** — salary + SS (30%) + training + tools → true cost/hr
-- [ ] **Improved UI** — hover tooltips on every input, print-friendly CSS
-- [ ] **Accessibility** — aria labels, keyboard nav, contrast audit
+1. **Can't save client data** — every client visit starts from scratch. Add localStorage so last state is remembered.
+2. **No print/PDF output** — sales have to manually copy numbers into a proposal doc. Add a printable summary view.
+3. **No quick-share link** — sales can't email a calculation to the client for review. Encode state in URL hash for sharing.
+4. **Can't edit hardware costs** — when FortiGate prices change, someone has to edit the code. Move hardware DB to a JSON block the team can edit.
+5. **No client NIF/name field** — proposals need this. Add a simple text field at the top.
 
-### Phase 1 — Professional (2–3 Weeks)
-_Focus: Multi-client, proposals, compliance_
+### Short-term (this month)
 
-- [ ] **Client database** — localStorage-backed client CRUD (name, NIF, address, sector)
-- [ ] **PDF proposal generation** — jsPDF or pdfmake with SMGTEC brand template
-- [ ] **Proposal version history** — saved snapshots per client
-- [ ] **RGPD/LOPDGDD cost estimator** — DPO hours, data audit, consent mgmt, AEPD risk score
-- [ ] **NIS2 readiness module** — sector selector → obligation checklist → cost estimate
-- [ ] **ENS compliance** — public sector module with categorization levels (BASIC/MEDIUM/HIGH)
-- [ ] **Export CSV** — bulk export all clients with key metrics
-- [ ] **Dark/light mode** — user-preference toggle
+6. **Client history** — save/load named client profiles in localStorage so sales can revisit and adjust.
+7. **Margin target per tier** — not all clients need 50% margin. Let the sales lead set per-tier targets.
+8. **Hardware cost versioning** — track when prices were last updated so margins don't drift.
+9. **Export to CSV** — sales team can batch-export all clients for management review.
 
-### Phase 2 — Growth (1–2 Months)
-_Focus: Analytics, intelligence, integration_
+### Medium-term (quarterly)
 
-- [ ] **Profitability dashboard** — per-client gross margin, MRR trend, cohort analysis
-- [ ] **Revenue forecasting** — based on current proposals, win-rate assumptions
-- [ ] **What-if scenario modeling** — change variables across all clients simultaneously
-- [ ] **API endpoints** — lightweight Express/Fastify backend or serverless functions
-- [ ] **PSA integration** — webhook targets for ConnectWise, Halo PSA, Autotask
-- [ ] **Integrator price catalogs** — sync from Ingram/Tech Data (distributor API)
-- [ ] **User authentication** — simple JWT or magic-link for multi-user access
-- [ ] **Client portal** — read-only proposal view for client approval
+10. **Lightweight backend (SQLite/supabase)** — shared database so multiple sales reps can see all client pricing. This is the biggest unlock.
+11. **Simple auth** — Google login or magic link so the team can access from anywhere.
+12. **English/Spanish toggle** — some clients prefer proposals in English.
 
-### Phase 3 — Scale (3–6 Months)
-_Focus: AI, platform, market positioning_
+### Not Worth Building (use existing tools instead)
 
-- [ ] **AI scoping engine** — describe client needs in natural language → tier/budget recommendation
-- [ ] **Automated proposal generation** — AI drafts proposal narrative from pricing data
-- [ ] **White-label / MSP resell** — other Spanish MSPs can use SMGTEC-branded instance
-- [ ] **Public API** — REST API for third-party integrations
-- [ ] **Marketplace listing** — as a "Spanish MSP Compliance + Pricing" tool
-- [ ] **vCIO strategic planning** — multi-year roadmap generation from pricing data
+| Don't build | Use Instead | Why |
+|-------------|-------------|-----|
+| Distributor price API | Manual DB with quarterly updates | API integrations require ongoing maintenance and contracts with distributors |
+| Full PSA integration | CSV export → import to existing PSA | Your PSA likely already has import; building a connector is overkill |
+| AI scoping engine | Sales judgment + current tiers | The 3-tier model already covers the range; AI adds complexity you don't need yet |
+| Client-facing portal | Email PDF | Clients don't need live access — they need a clear proposal |
 
 ---
 
-## 6. Go-to-Market Strategy
+## Summary
 
-### Positioning
-> "The only MSP pricing & quoting platform built for Spanish regulation."
+**Keep the custom calculator.** No commercial tool does Spanish regulation, margin guardrails, and SLA risk visibility as well. Invest in:
 
-### ICP
-- Spanish MSPs with 5–50 employees (€500K–€5M revenue)
-- Serving regulated sectors (healthcare, legal, finance, public sector)
-- Currently using spreadsheets or no formal pricing tool
-- Need RGPD/LOPDGDD/NIS2 compliance baked into the quote
+1. **Saving and sharing client data** (immediate win for sales team)
+2. **PDF proposal generation** (makes your team look professional without extra work)
+3. **A lightweight shared database** when the team grows beyond 1–2 sales reps
 
-### Distribution
-1. **Direct outbound** — Spanish MSP associations, LinkedIn
-2. **Community** — r/msp-es, RiiOT, MSP Iberia events
-3. **Partner** — bundle with PSA implementations, law firms advising on data protection
-4. **Content** — "MSP Pricing in Spain: Regulatory Compliance Cost Guide"
-5. **Free tier** — single-client version with RGPD estimator → upsell multi-client analytics
-
-### Monetization
-| Tier | Price | Target |
-|------|-------|--------|
-| **Free** | €0 | Solo operators, evaluation |
-| **Starter** | €29/mo | Up to 5 clients, RGPD module |
-| **Professional** | €79/mo | Unlimited clients, NIS2 + ENS, export, PDF proposals |
-| **Enterprise** | Custom | API, white-label, multi-user, PSA integration |
+Meanwhile, T3 pricing may be too low for the stack you're delivering — that's worth a margin review.
 
 ---
 
-## 7. Next Actions (Immediate)
-
-1. **⏩ Phase 0 implementation** — localStorage, IVA, multi-language, fully-loaded labor
-2. **⏩ Publish Phase 0** — iterative deployment to GitHub Pages (same repo, branch-based)
-3. **⏩ User testing** — let current SMGTEC sales team use it, gather feedback
-4. **⏩ Phase 1 planning** — detailed spec for client DB + PDF + compliance modules
-
----
-
-*This document is a living roadmap. Priority order may shift based on user feedback and market signals.*
+*This replaces the earlier version which incorrectly compared the calculator against commercial tools as "competitors." The calculator is an internal tool; the question is build vs. buy, and if build, what makes the sales team more effective.*
