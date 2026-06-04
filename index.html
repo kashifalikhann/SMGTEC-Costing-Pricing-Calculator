@@ -1149,123 +1149,276 @@
       }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-      const pageW = 210;
-      const margin = 15;
-      const contentW = pageW - 2 * margin;
-      let y = margin;
+      const pageW = 210, margin = 15, contentW = pageW - 2 * margin;
 
-      const gold = [212, 175, 55];
-      const dark = [27, 53, 59];
-      const cream = [229, 213, 188];
+      // Colors
+      const navy = [27, 53, 59], gold = [212, 175, 55], white = [255, 255, 255];
+      const grayBg = [248, 248, 245], grayLight = [230, 230, 225], grayMid = [160, 160, 155];
+      const greenTxt = [0, 150, 80], redTxt = [200, 50, 50], darkTxt = [50, 50, 50];
 
-      doc.setFillColor(...dark);
-      doc.rect(0, 0, pageW, 35, 'F');
+      // Helper — draw filled rect with optional border
+      function drawBox(x, y, w, h, fillColor, strokeColor) {
+        if (fillColor) { doc.setFillColor(...fillColor); doc.rect(x, y, w, h, 'F'); }
+        if (strokeColor) { doc.setDrawColor(...strokeColor); doc.rect(x, y, w, h, 'S'); }
+      }
+
+      // Header
+      doc.setFillColor(...navy);
+      doc.rect(0, 0, pageW, 38, 'F');
+      doc.setFillColor(...gold);
+      doc.rect(0, 36, pageW, 2, 'F');
       doc.setTextColor(...gold);
-      doc.setFontSize(18);
+      doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
-      doc.text('SMGTEC SL', margin, 18);
-      doc.setFontSize(8);
-      doc.setTextColor(...cream);
-      doc.text('Barcelona — Official Pricing Proposal', margin, 25);
+      doc.text('SMGTEC SL', margin, 16);
       doc.setFontSize(7);
-      doc.setTextColor(180, 170, 160);
-      doc.text(`Quote #${quoteId}  |  ${document.getElementById('quoteDate').value || new Date().toISOString().split('T')[0]}`, margin, 31);
-
-      y = 42;
-      doc.setTextColor(50, 50, 50);
-      doc.setFontSize(10);
+      doc.setTextColor(180, 175, 165);
+      doc.setFont('helvetica', 'normal');
+      doc.text('C/ de la Tecnologia 42 · 08001 Barcelona · info@smgtec.com · +34 936 123 456', margin, 25);
+      doc.setFontSize(8);
+      doc.setTextColor(...gold);
       doc.setFont('helvetica', 'bold');
-      doc.text('Client:', margin, y);
+      doc.text(
+        `Quote #${quoteId}`,
+        pageW - margin - 20, 16, { align: 'right' }
+      );
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(180, 175, 165);
+      doc.text(
+        document.getElementById('quoteDate').value || new Date().toISOString().split('T')[0],
+        pageW - margin, 23, { align: 'right' }
+      );
+
+      // — Client Info Box —
+      let y = 52;
+      drawBox(margin, y, contentW, 18, grayBg, grayLight);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(...navy);
+      doc.text('CLIENT INFORMATION', margin + 3, y + 4);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      doc.text(`${document.getElementById('clientName').value || '[Client Name]'}  |  NIF: ${document.getElementById('clientNIF').value || '[NIF]'}`, margin + 20, y);
-      y += 6;
+      doc.setTextColor(...darkTxt);
+      const cn = document.getElementById('clientName').value || '[Client Name]';
+      const nif = document.getElementById('clientNIF').value || '[NIF]';
       const ce = document.getElementById('clientEmail').value || '';
       const cp = document.getElementById('clientPhone').value || '';
-      doc.text(`Contact: ${ce}${cp ? '  |  ' + cp : ''}`, margin + 20, y);
+      const ca = document.getElementById('clientAddress').value || '';
+      doc.text(cn, margin + 3, y + 10);
+      doc.text(`NIF: ${nif}`, margin + 80, y + 10);
+      doc.text(ca, margin + 3, y + 15);
+      const contactStr = [ce, cp].filter(Boolean).join('  |  ');
+      if (contactStr) doc.text(contactStr, margin + 80, y + 15);
 
-      y += 10;
+      // — Proposal Overview —
+      y += 24;
       const approvedAll = tiers.every(t => !t.enabled || t.approved);
+      const nis2SectorVal = document.getElementById('nis2Sector').value;
+      const hasNis2 = nis2SectorVal && nis2SectorVal !== 'none';
 
+      drawBox(margin, y, contentW, 14, grayBg, grayLight);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(...navy);
+      doc.text('PROPOSAL OVERVIEW', margin + 3, y + 4);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(...darkTxt);
+      const tNames = tiers.filter(t => t.enabled).map((_, i) => `Tier ${i+1}`).join(', ');
+      doc.text(`Pricing tiers: ${tNames || 'None'}  |  RGPD: ${document.getElementById('rgpdToggle').checked ? 'Yes' : 'No'}  |  NIS2: ${hasNis2 ? 'Yes' : 'No'}  |  IVA: ${document.getElementById('ivaRate').value === '1.21' ? '21%' : document.getElementById('ivaRate').value === '1.10' ? '10%' : 'Exempt'}`, margin + 3, y + 10);
+
+      // — Tier Tables (using autoTable) —
+      y += 20;
       tiers.forEach((tier, idx) => {
         if (!tier.enabled) return;
-        if (y > 230) { doc.addPage(); y = margin; }
 
-        doc.setFillColor(245, 245, 240);
-        doc.rect(margin, y, contentW, 8, 'F');
+        // Check if we need a new page
+        if (y > 210) { doc.addPage(); y = 15; }
+
+        // Tier header bar
+        doc.setFillColor(...navy);
+        doc.rect(margin, y, contentW, 7, 'F');
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(...dark);
-        doc.text(`TIER ${idx+1}: ${tier.name}`, margin + 2, y + 5.5);
-        doc.setTextColor(...(tier.approved ? [0, 150, 80] : [200, 50, 50]));
-        doc.setFontSize(7);
-        doc.text(tier.approved ? 'APPROVED' : 'PENDING APPROVAL', pageW - margin - 25, y + 5.5);
-        y += 11;
+        doc.setFontSize(8);
+        doc.setTextColor(...gold);
+        doc.text(`TIER ${idx+1}: ${tier.name}`, margin + 2, y + 4.5);
+        doc.setTextColor(...(tier.approved ? greenTxt : redTxt));
+        doc.setFontSize(6.5);
+        doc.text(tier.approved ? '✓ APPROVED' : '! PENDING APPROVAL', pageW - margin - 2, y + 4.5, { align: 'right' });
+        y += 9;
 
+        // Subtitle
+        if (tier.subtitle) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(7);
+          doc.setTextColor(...grayMid);
+          doc.text(tier.subtitle, margin + 1, y + 3);
+          y += 6;
+        }
+
+        // Setup summary
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(...navy);
+        drawBox(margin, y, contentW, 5, [242, 240, 235]);
+        doc.text('One-Time Setup', margin + 2, y + 3.5);
+        y += 6;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, y, pageW - margin, y);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Setup', margin + 1, y + 4);
+        doc.setTextColor(...darkTxt);
+        const setupItems = [
+          ['Client Charge', `€${tier.setupRev.toFixed(2)}`, { halign: 'right' }],
+          ['Cost', `€${tier.setupCost.toFixed(2)}`, { halign: 'right' }],
+          ['Profit', `€${tier.setupProfit.toFixed(2)}`, { halign: 'right' }],
+          ['Margin', `${tier.setupMargin.toFixed(1)}%`, { halign: 'right', color: tier.setupMargin >= 50 ? greenTxt : redTxt }]
+        ];
+        doc.autoTable({
+          startY: y,
+          margin: { left: margin + 2, right: margin + 2 },
+          tableWidth: contentW - 4,
+          body: [setupItems.map(i => i[0]), setupItems.map(i => i[1])],
+          theme: 'plain',
+          styles: { fontSize: 7, cellPadding: { top: 0.5, bottom: 0.5, left: 2, right: 2 } },
+          columnStyles: {
+            0: { cellWidth: 28, fontStyle: 'bold', fillColor: [248, 248, 245] },
+            1: { cellWidth: 22, halign: 'right' },
+            2: { cellWidth: 22, halign: 'right' },
+            3: { cellWidth: 22, halign: 'right' }
+          },
+          didParseCell: function(data) {
+            if (data.section === 'body' && data.row.index === 1 && data.column.index === 3 && setupItems[3][2].color) {
+              data.cell.textColor = setupItems[3][2].color;
+            }
+          },
+          headStyles: { fillColor: [248, 248, 245], textColor: navy, fontStyle: 'bold', fontSize: 6.5, halign: 'center' }
+        });
+        y = doc.lastAutoTable.finalY + 2;
+
+        // IVA and deposit info line
+        doc.setFontSize(6.5);
+        doc.setTextColor(...grayMid);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Client Charge: €${tier.setupRev.toFixed(2)}`, margin + 30, y + 4);
-        doc.text(`Cost: €${tier.setupCost.toFixed(2)}`, margin + 70, y + 4);
-        doc.text(`Margin: ${tier.setupMargin.toFixed(1)}%`, margin + 100, y + 4);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`IVA: €${tier.withTaxSetup.toFixed(2)}`, margin + 140, y + 4);
-        doc.setTextColor(50, 50, 50);
+        doc.text(`IVA (${document.getElementById('ivaRate').value === '1.21' ? '21%' : document.getElementById('ivaRate').value === '1.10' ? '10%' : 'Exempt'}): €${tier.withTaxSetup.toFixed(2)}  |  50% Deposit: €${tier.deposit.toFixed(2)}`, margin + 2, y + 3);
+        y += 7;
+
+        // Monthly summary
+        drawBox(margin, y, contentW, 5, [242, 240, 235]);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(...navy);
+        doc.text('Monthly Recurring', margin + 2, y + 3.5);
         y += 6;
 
-        doc.setDrawColor(220, 220, 220);
-        doc.line(margin, y, pageW - margin, y);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Monthly', margin + 1, y + 4);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Client Charge: €${tier.monthlyRev.toFixed(2)}/mo`, margin + 30, y + 4);
-        doc.text(`Yr1 Cost: €${tier.monthlyCostY1.toFixed(2)}/mo`, margin + 70, y + 4);
-        doc.text(`Yr1 Margin: ${tier.mMarginY1.toFixed(1)}%`, margin + 100, y + 4);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`IVA: €${tier.withTaxMonthly.toFixed(2)}/mo`, margin + 140, y + 4);
-        doc.setTextColor(50, 50, 50);
+        const monthlyItems = [
+          ['', 'Year 1', 'Year 2'],
+          ['Revenue', `€${tier.monthlyRev.toFixed(2)}/mo`, `€${tier.monthlyRev.toFixed(2)}/mo`],
+          ['Cost', `€${tier.monthlyCostY1.toFixed(2)}/mo`, `€${tier.monthlyCostY2.toFixed(2)}/mo`],
+          ['Profit', `€${tier.mProfitY1.toFixed(2)}/mo`, `€${tier.mProfitY2.toFixed(2)}/mo`],
+          ['Margin', `${tier.mMarginY1.toFixed(1)}%`, `${tier.mMarginY2.toFixed(1)}%`]
+        ];
+        doc.autoTable({
+          startY: y,
+          margin: { left: margin + 2, right: margin + 2 },
+          tableWidth: contentW - 4,
+          body: monthlyItems,
+          theme: 'plain',
+          styles: { fontSize: 7, cellPadding: { top: 0.5, bottom: 0.5, left: 2, right: 2 } },
+          columnStyles: {
+            0: { cellWidth: 28, fontStyle: 'bold', fillColor: [248, 248, 245] },
+            1: { cellWidth: 30, halign: 'right' },
+            2: { cellWidth: 30, halign: 'right' }
+          },
+          headStyles: { fillColor: [248, 248, 245], textColor: navy, fontStyle: 'bold', fontSize: 6.5, halign: 'center' },
+          didParseCell: function(data) {
+            if (data.section === 'body' && data.row.index >= 4 && data.column.index > 0) {
+              const val = parseFloat(data.cell.text[0]);
+              data.cell.textColor = val >= 50 ? greenTxt : redTxt;
+            }
+          }
+        });
+        y = doc.lastAutoTable.finalY + 3;
+
+        // IVA on monthly
+        doc.setFontSize(6.5);
+        doc.setTextColor(...grayMid);
+        doc.text(`IVA (${document.getElementById('ivaRate').value === '1.21' ? '21%' : document.getElementById('ivaRate').value === '1.10' ? '10%' : 'Exempt'}): €${tier.withTaxMonthly.toFixed(2)}/mo`, margin + 2, y + 3);
+
+        // SLA
+        if (tier.sla && tier.sla > 0) {
+          doc.text(`SLA Penalty: ${idx === 0 ? 'None' : idx === 1 ? '10% of monthly fee' : '15% of monthly fee'}`, margin + 75, y + 3);
+        }
         y += 6;
 
-        doc.setDrawColor(230, 230, 230);
-        doc.line(margin, y, pageW - margin, y);
-        doc.text(`Year 1 Aggregate: Revenue €${tier.aggRevY1.toFixed(2)}  |  Cost €${tier.aggCostY1.toFixed(2)}  |  Profit €${tier.aggProfit.toFixed(2)}  |  Margin ${tier.aggMargin.toFixed(1)}%`, margin + 1, y + 4);
-        y += 8;
+        // Year 1 aggregate bar
+        drawBox(margin, y, contentW, 6, [245, 243, 238]);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.5);
+        doc.setTextColor(...navy);
+        doc.text(
+          `Year 1: Revenue €${tier.aggRevY1.toFixed(2)}  |  Cost €${tier.aggCostY1.toFixed(2)}  |  Profit €${tier.aggProfit.toFixed(2)}  |  Margin ${tier.aggMargin.toFixed(1)}%`,
+          margin + 2, y + 4
+        );
+        y += 10;
+
+        // Separator between tiers
+        if (idx < 2) {
+          doc.setDrawColor(...grayLight);
+          doc.line(margin + 5, y, pageW - margin - 5, y);
+          y += 5;
+        }
       });
 
-      if (y > 220) doc.addPage();
-      y = Math.max(y, 230);
-      doc.setDrawColor(...dark);
-      doc.setFillColor(245, 245, 240);
-      doc.rect(margin, y, contentW, 35, 'F');
+      // — Terms & Conditions box —
+      if (y > 200) { doc.addPage(); y = 15; }
+      y = Math.max(y, 195);
+
+      doc.setDrawColor(...navy);
+      doc.setFillColor(...grayBg);
+      doc.rect(margin, y, contentW, 48, 'F');
+      doc.setDrawColor(...gold);
+      doc.rect(margin, y, contentW, 48, 'S');
+
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
-      doc.setTextColor(...dark);
-      doc.text('CONTRACT TERMS & COMPLIANCE', margin + 2, y + 4);
+      doc.setFontSize(8);
+      doc.setTextColor(...navy);
+      doc.text('CONTRACT TERMS & COMPLIANCE', margin + 3, y + 5);
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(6.5);
-      doc.setTextColor(80, 80, 80);
-      doc.text([
-        '• 50% upfront hardware deposit due on contract signature; 50% on delivery and acceptance.',
-        '• Late payment penalty: 1.5% monthly on outstanding balance.',
-        '• Minimum contract term: 12 months. Early termination: 50% of remaining contract value.',
-        '• SLA penalties: Tier 1 — none; Tier 2 — 10% of monthly fee per breach; Tier 3 — 15% of monthly fee per breach.',
-        '• All prices exclude applicable IVA (VAT). Prices valid for 30 days from quote date.',
-        `• RGPD/LOPDGDD compliance: ${document.getElementById('rgpdToggle').checked ? 'Included' : 'Not included'}`,
-        `• IVA Rate: ${document.getElementById('ivaRate').value === '1.21' ? '21% Standard' : document.getElementById('ivaRate').value === '1.10' ? '10% Reduced' : 'Exempt'}`
-      ].join('\n'), margin + 2, y + 9);
+      doc.setTextColor(...darkTxt);
+      const terms = [
+        '50% hardware deposit due on contract signature; 50% on delivery and acceptance.',
+        'Late payment penalty: 1.5% monthly on outstanding balance.',
+        'Minimum term: 12 months. Early termination: 50% of remaining contract value.',
+        `SLA: ${tiers.filter(t=>t.enabled).map((t,i)=>`Tier ${i+1} — ${i===0?'None':i===1?'10% rebate':'15% rebate'}`).join('; ')}.`,
+        'All prices exclude applicable IVA (VAT). Prices valid 30 days from quote date.',
+        `RGPD/LOPDGDD: ${document.getElementById('rgpdToggle').checked ? 'Included' : 'Not included'}.`,
+        `IVA rate: ${document.getElementById('ivaRate').value === '1.21' ? '21% (Standard)' : document.getElementById('ivaRate').value === '1.10' ? '10% (Reduced)' : 'Exempt'}.`
+      ];
+      doc.text(terms.join('\n'), margin + 3, y + 11);
 
-      doc.setFontSize(6);
-      doc.setTextColor(150, 150, 150);
-      doc.text(`Generated by SMGTEC Internal CPQ Engine  |  Quote ID: ${quoteId}  |  ${new Date().toISOString().split('T')[0]}`, margin, 275);
+      // Approval banner
+      doc.setFontSize(7);
+      if (approvedAll) {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...greenTxt);
+        doc.text('✓ This quote is APPROVED — all margins meet the 50% threshold.', margin + 3, y + 44);
+      } else {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...redTxt);
+        doc.text('⚠ THIS QUOTE REQUIRES ADMIN APPROVAL — some margins are below the 50% threshold.', margin + 3, y + 44);
+      }
 
-      if (!approvedAll) {
-        doc.setTextColor(200, 50, 50);
-        doc.setFontSize(8);
-        doc.text('⚠️ THIS QUOTE REQUIRES ADMIN APPROVAL — margins below 50% threshold', margin, 268);
+      // — Page Footer — 
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6);
+        doc.setTextColor(...grayMid);
+        doc.text(`SMGTEC SL · NIF B-12345678 · C/ de la Tecnologia 42, 08001 Barcelona`, margin, 290, { align: 'center' });
+        doc.text(`Quote #${quoteId} · Page ${i} of ${pageCount} · Generated ${new Date().toISOString().split('T')[0]}`, margin, 294, { align: 'center' });
       }
 
       doc.save(`SMGTEC_Quote_${quoteId}.pdf`);
