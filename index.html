@@ -86,7 +86,9 @@
         </span>
         <button onclick="openAdmin()" class="bg-smg_dark border border-smg_gold/40 text-smg_gold px-3 py-1.5 rounded-lg hover:bg-smg_gold/10 transition text-xs uppercase tracking-wider font-bold">Admin DB</button>
         <button onclick="generatePDF()" class="bg-smg_gold text-smg_dark px-3 py-1.5 rounded-lg font-bold hover:bg-yellow-400 transition text-xs uppercase tracking-wider">PDF Quote</button>
-        <button onclick="document.getElementById('userManual').scrollIntoView({behavior:'smooth'})" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg hover:bg-smg_cream/10 transition text-xs uppercase tracking-wider font-bold">Manual</button>
+        <button onclick="sendQuoteEmail()" class="bg-smg_dark border border-smg_gold/40 text-smg_gold px-3 py-1.5 rounded-lg font-bold hover:bg-smg_gold/10 transition text-xs uppercase tracking-wider" data-i18n="send_quote">Send Quote</button>
+        <button onclick="document.getElementById('userManual').scrollIntoView({behavior:'smooth'})" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg hover:bg-smg_cream/10 transition text-xs uppercase tracking-wider font-bold" data-i18n="manual">Manual</button>
+        <button onclick="setLang(LANG.current === 'en' ? 'es' : 'en')" class="bg-smg_dark border border-smg_gold/40 text-smg_gold px-3 py-1.5 rounded-lg hover:bg-smg_gold/10 transition text-xs uppercase tracking-wider font-bold min-w-[40px]" id="langToggle">EN</button>
       </div>
     </header>
 
@@ -110,6 +112,46 @@
       <button onclick="copyShareLink()" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg text-xs hover:bg-smg_cream/10 transition">🔗 Share Link</button>
       <button onclick="resetQuoteItems()" class="bg-red-900/30 border border-red-500/40 text-red-300 px-3 py-1.5 rounded-lg text-xs hover:bg-red-900/50 transition">↺ Reset Items</button>
       <span id="approvalBadge" class="hidden px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider"></span>
+    </div>
+
+    <!-- ===== CONTRACT TERM, ESCALATION, DISCOUNT ===== -->
+    <div class="flex flex-wrap gap-4 mb-4 no-print items-end">
+      <div>
+        <label class="text-[9px] uppercase text-smg_cream/60 font-bold" data-i18n="contract_term">Contract Term</label>
+        <select id="contractTerm" class="bg-smg_dark/80 border border-smg_cream/20 rounded px-2 py-1.5 text-white text-xs focus:border-smg_gold focus:outline-none">
+          <option value="12">12 months</option>
+          <option value="24">24 months</option>
+          <option value="36">36 months</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-[9px] uppercase text-smg_cream/60 font-bold" data-i18n="annual_escalation">Annual Escalation</label>
+        <div class="flex gap-1 items-center">
+          <input type="checkbox" id="escalationToggle" class="w-3.5 h-3.5 text-smg_gold bg-slate-800 border-smg_cream/30 rounded focus:ring-smg_gold">
+          <input type="number" id="escalationPct" value="3" min="0" max="20" step="0.5" class="w-16 bg-smg_dark/80 border border-smg_cream/20 rounded px-2 py-1.5 text-white text-xs focus:border-smg_gold focus:outline-none">
+          <span class="text-[10px] text-smg_cream/50" data-i18n="pct_yr">% / yr</span>
+        </div>
+      </div>
+      <div>
+        <label class="text-[9px] uppercase text-smg_cream/60 font-bold" data-i18n="discount">Discount</label>
+        <div class="flex gap-2">
+          <select id="discountTier" class="bg-smg_dark/80 border border-smg_cream/20 rounded px-1.5 py-1.5 text-white text-[10px] focus:border-smg_gold focus:outline-none">
+            <option value="0">All Tiers</option>
+            <option value="1">Tier 1</option>
+            <option value="2">Tier 2</option>
+            <option value="3">Tier 3</option>
+          </select>
+          <input type="number" id="discountPct" value="0" min="0" max="100" step="1" class="w-16 bg-smg_dark/80 border border-smg_cream/20 rounded px-2 py-1.5 text-white text-xs focus:border-smg_gold focus:outline-none">
+          <span class="text-[10px] text-smg_cream/50">%</span>
+          <button onclick="applyDiscount()" class="bg-smg_dark border border-smg_gold/30 text-smg_gold px-2 py-1.5 rounded text-[10px] hover:bg-smg_gold/10 transition">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== INTERNAL NOTES ===== -->
+    <div class="mb-4 no-print">
+      <label class="text-[9px] uppercase text-smg_cream/60 font-bold" data-i18n="internal_notes">Internal Notes</label>
+      <textarea id="internalNotes" rows="2" placeholder="Internal notes (not included in PDF)..." class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-xs focus:border-smg_gold focus:outline-none mt-1"></textarea>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -316,6 +358,9 @@
           </div>
         </div>
 
+        <!-- TIER COMPARISON TABLE -->
+        <div id="comparisonTable" class="hidden bg-smg_dark/60 border border-smg_cream/15 rounded-xl p-4"></div>
+
         <!-- QUOTE SUMMARY (visible only during PDF generation) -->
         <div id="quoteSummary" class="hidden"></div>
 
@@ -356,7 +401,103 @@
   };
 
   // =====================================================================
-  // 2. RUNTIME STATE
+  // 2. I18N — Spanish / English
+  // =====================================================================
+  const LANG = { current: localStorage.getItem('smgtec_lang') || 'es' };
+  const _t = {
+    'lang_en': { en: 'EN', es: 'EN' },
+    'lang_es': { en: 'ES', es: 'ES' },
+    'app_title': { en: 'SMGTEC SL — Internal CPQ Engine', es: 'SMGTEC SL — Motor CPQ Interno' },
+    'labor': { en: 'Labor', es: 'Mano de obra' },
+    'admin_db': { en: 'Admin DB', es: 'Admin BD' },
+    'pdf_quote': { en: 'PDF Quote', es: 'PDF Presupuesto' },
+    'manual': { en: 'Manual', es: 'Manual' },
+    'client_name': { en: 'Client Name / Company', es: 'Cliente / Empresa' },
+    'nif': { en: 'NIF / CIF', es: 'NIF / CIF' },
+    'quote_date': { en: 'Quote Date', es: 'Fecha del presupuesto' },
+    'email': { en: 'Email', es: 'Correo electrónico' },
+    'phone': { en: 'Phone', es: 'Teléfono' },
+    'address': { en: 'Address', es: 'Dirección' },
+    'save': { en: '💾 Save Proposal', es: '💾 Guardar' },
+    'load': { en: '📂 Load Proposal', es: '📂 Cargar' },
+    'export': { en: '📥 Export JSON', es: '📥 Exportar JSON' },
+    'share': { en: '🔗 Share Link', es: '🔗 Compartir enlace' },
+    'reset': { en: '↺ Reset Items', es: '↺ Restablecer' },
+    'infrastructure': { en: 'Client Infrastructure', es: 'Infraestructura del cliente' },
+    'desktops': { en: 'Desktop Workstations', es: 'Puestos de sobremesa' },
+    'laptops': { en: 'Laptop Workstations', es: 'Portátiles' },
+    'server_assessment': { en: 'Server Assessment', es: 'Evaluación del servidor' },
+    'buy_server': { en: 'Buy New Server (Recommended)', es: 'Comprar servidor nuevo (Recomendado)' },
+    'retain_server': { en: 'Retain Existing Server', es: 'Conservar servidor existente' },
+    'cloud_transition': { en: 'Cloud Transition (No Server)', es: 'Transición a la nube' },
+    'compliance_tax': { en: 'Compliance & Taxation', es: 'Cumplimiento normativo e IVA' },
+    'licensing': { en: 'Licensing & Sourcing', es: 'Licencias y aprovisionamiento' },
+    'm365_licenses': { en: 'M365 Licenses', es: 'Licencias M365' },
+    'dropsuite': { en: 'Dropsuite Backup', es: 'Copias de seguridad Dropsuite' },
+    'voip': { en: 'VoIP / 3CX', es: 'VoIP / 3CX' },
+    'one_time_setup': { en: 'One-Time Setup', es: 'Instalación única' },
+    'monthly_recurring': { en: 'Monthly Recurring', es: 'Cuota mensual' },
+    'year_1_aggregate': { en: 'Year 1 Aggregate', es: 'Agregado año 1' },
+    'charge': { en: 'Charge', es: 'Importe' },
+    'cost': { en: 'Cost', es: 'Coste' },
+    'profit_margin': { en: 'Profit / Margin', es: 'Beneficio / Margen' },
+    'services_margin': { en: 'Services margin (excl. licenses)', es: 'Margen servicios (excl. licencias)' },
+    'blended': { en: 'Blended', es: 'Mixto' },
+    'approved': { en: '✓ APPROVED', es: '✓ APROBADO' },
+    'pending': { en: '! PENDING', es: '! PENDIENTE' },
+    'pending_approval': { en: '⚠️ PENDING APPROVAL — services margin below 40% threshold', es: '⚠️ PENDIENTE APROBACIÓN — margen servicios por debajo del 40%' },
+    'contract_term': { en: 'Contract Term', es: 'Plazo del contrato' },
+    'months': { en: 'months', es: 'meses' },
+    'annual_escalation': { en: 'Annual Escalation', es: 'Escalado anual' },
+    'discount': { en: 'Discount', es: 'Dto.' },
+    'internal_notes': { en: 'Internal Notes', es: 'Notas internas' },
+    'compare_tiers': { en: 'Tier Comparison', es: 'Comparativa de niveles' },
+    'deposit': { en: 'Deposit', es: 'Depósito' },
+    'sla': { en: 'SLA', es: 'SLA' },
+    'with_iva': { en: 'With IVA', es: 'Con IVA' },
+    'revenue': { en: 'Revenue', es: 'Ingresos' },
+    'margin': { en: 'Margin', es: 'Margen' },
+    'send_email': { en: '📧 Send to Client', es: '📧 Enviar al cliente' },
+    'sgd': { en: 'Swiss Guard Defense', es: 'Swiss Guard Defense' },
+    'active_perimeter': { en: 'Active Perimeter', es: 'Perímetro activo' },
+    'fully_protected': { en: 'Fully Protected', es: 'Totalmente protegido' },
+    'data_protection': { en: 'Data Protection', es: 'Protección de datos' },
+    'setup': { en: 'Setup', es: 'Instalación' },
+    'monthly': { en: 'Monthly', es: 'Mensual' },
+    'year': { en: 'Year', es: 'Año' },
+    'total': { en: 'Total', es: 'Total' },
+    'profit': { en: 'Profit', es: 'Beneficio' },
+    'services_margin_short': { en: 'Services margin', es: 'Margen servicios' },
+    'threshold_40': { en: 'threshold: 40%', es: 'umbral: 40%' },
+    'services_margin_excl_lic': { en: 'Services margin (excl. software licenses)', es: 'Margen servicios (excl. licencias software)' },
+    'info_req': { en: 'info@smgtec.com', es: 'info@smgtec.com' },
+    'metric': { en: 'Metric', es: 'Métrica' },
+    'setup_charge': { en: 'Setup Charge', es: 'Instalación' },
+    'blended_margin': { en: 'Blended Margin', es: 'Margen mixto' },
+    'setup_margin_s': { en: 'Setup Margin', es: 'Margen instalación' },
+    'term': { en: 'Term', es: 'Plazo' },
+    'email_required': { en: 'Please enter a client email address first.', es: 'Introduce el correo electrónico del cliente primero.' },
+    'quote_subject': { en: 'Quote from SMGTEC — Ref:', es: 'Presupuesto de SMGTEC — Ref:' },
+    'send_quote': { en: 'Send Quote', es: 'Enviar presupuesto' },
+    'all_tiers': { en: 'All Tiers', es: 'Todos los niveles' },
+    'apply': { en: 'Apply', es: 'Aplicar' },
+    'contract_12': { en: '12 months', es: '12 meses' },
+    'contract_24': { en: '24 months', es: '24 meses' },
+    'contract_36': { en: '36 months', es: '36 meses' },
+    'pct_yr': { en: '% / yr', es: '% / año' }
+  };
+  function __(key) { return (_t[key] && _t[key][LANG.current]) ? _t[key][LANG.current] : key; }
+  function setLang(l) {
+    LANG.current = l;
+    localStorage.setItem('smgtec_lang', l);
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = __(el.dataset.i18n); });
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.textContent = LANG.current === 'en' ? 'ES' : 'EN';
+    calculateQuote();
+  }
+
+  // =====================================================================
+  // 3. RUNTIME STATE
   // =====================================================================
   let config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
   let customItems = [];
@@ -486,12 +627,19 @@
     }
 
     function finalizeTier(t) {
+      const escalationActive = document.getElementById('escalationToggle').checked;
+      const escalationPct = parseFloat(document.getElementById('escalationPct').value) || 0;
+      const escMult = escalationActive ? (1 + escalationPct / 100) : 1;
+      const term = parseInt(document.getElementById('contractTerm').value) || 12;
+      const tRevY2 = t.monthlyRev * escMult;
+
+      t.term = term;
       t.setupProfit = t.setupRev - t.setupCost;
       t.setupMargin = t.setupRev > 0 ? (t.setupProfit / t.setupRev) * 100 : 0;
       t.mProfitY1 = t.monthlyRev - t.monthlyCostY1;
       t.mMarginY1 = t.monthlyRev > 0 ? (t.mProfitY1 / t.monthlyRev) * 100 : 0;
-      t.mProfitY2 = t.monthlyRev - t.monthlyCostY2;
-      t.mMarginY2 = t.monthlyRev > 0 ? (t.mProfitY2 / t.monthlyRev) * 100 : 0;
+      t.mProfitY2 = tRevY2 - t.monthlyCostY2;
+      t.mMarginY2 = tRevY2 > 0 ? (t.mProfitY2 / tRevY2) * 100 : 0;
       // Services-only metrics (excludes resold software licenses like M365/VoIP/Dropsuite)
       t.svcCostY1 = t.monthlyCostY1 - (t.licCost || 0);
       t.svcRev = t.monthlyRev - (t.licRev || 0);
@@ -507,6 +655,15 @@
       t.withTaxMonthly = applyIVA(t.monthlyRev);
       t.approved = t.setupMargin >= 40 && t.svcMarginY1 >= 40;
       t.deposit = t.setupRev * 0.5;
+    }
+
+    function applyTierDiscount(t, idx) {
+      if (tierDiscounts[idx] > 0) {
+        const d = tierDiscounts[idx] / 100;
+        t.setupRev *= (1 - d);
+        t.monthlyRev *= (1 - d);
+        finalizeTier(t);
+      }
     }
 
     // ============================================================
@@ -527,6 +684,7 @@
       addCustomToTier(t1, 1);
       finalizeTier(t1);
       t1.sla = 0;
+      applyTierDiscount(t1, 0);
     }
 
     // ============================================================
@@ -546,6 +704,7 @@
     addCustomToTier(t2, 2);
     finalizeTier(t2);
     t2.sla = t2.monthlyRev * 0.1;
+    applyTierDiscount(t2, 1);
 
     // ============================================================
     // TIER 3
@@ -601,6 +760,7 @@
     addCustomToTier(t3, 3);
     finalizeTier(t3);
     t3.sla = t3.monthlyRev * 0.15;
+    applyTierDiscount(t3, 2);
 
     // -- Update UI warnings --
     const warnBanner = document.getElementById('minimum_billing_warning');
@@ -631,6 +791,7 @@
     renderDashboard(tiers);
     renderLineItems(tiers);
     updateApprovalBadge(tiers);
+    renderComparisonTable(tiers);
 
     return tiers;
   }
@@ -640,6 +801,7 @@
   // =====================================================================
   // Stored per-tier as { key: 'hw_FORTIGATE_60F', wholesale: 735, retail: 1290 }
   let lineOverrides = { 1: {}, 2: {}, 3: {} };
+  let tierDiscounts = [0, 0, 0];
 
   function getLineItemOverride(tier, key) {
     return (lineOverrides[tier] && lineOverrides[tier][key]) || null;
@@ -1077,11 +1239,11 @@
   // =====================================================================
   function getState() {
     const formData = {};
-    document.querySelectorAll('[id^="input_"], [id^="client"], #serverAssessment, #expiredWarranty, #rgpdToggle, #nis2Sector, #ivaRate, #dropsuiteToggle').forEach(el => {
+    document.querySelectorAll('[id^="input_"], [id^="client"], #serverAssessment, #expiredWarranty, #rgpdToggle, #nis2Sector, #ivaRate, #dropsuiteToggle, #contractTerm, #escalationToggle, #escalationPct, #internalNotes').forEach(el => {
       if (el.type === 'checkbox') formData[el.id] = el.checked;
       else formData[el.id] = el.value;
     });
-    return { config, customItems, formData, lineOverrides, removedItems, addedItems, quoteId, version: 3 };
+    return { config, customItems, formData, lineOverrides, removedItems, addedItems, quoteId, tierDiscounts, version: 4 };
   }
   function restoreState(state) {
     if (!state) return;
@@ -1091,6 +1253,7 @@
     if (state.removedItems) removedItems = state.removedItems;
     if (state.addedItems) addedItems = state.addedItems;
     if (state.quoteId) quoteId = state.quoteId;
+    if (state.tierDiscounts) tierDiscounts = state.tierDiscounts;
     if (state.formData) {
       Object.entries(state.formData).forEach(([id, val]) => {
         const el = document.getElementById(id);
@@ -1156,7 +1319,69 @@
   }
 
   // =====================================================================
-  // 12. PDF GENERATION (jsPDF)
+  // 12a. DISCOUNT & COMPARISON TABLE & EMAIL
+  // =====================================================================
+
+  function applyDiscount() {
+    const tierIdx = parseInt(document.getElementById('discountTier').value);
+    const pct = parseFloat(document.getElementById('discountPct').value) || 0;
+    if (tierIdx === 0) { tierDiscounts = [pct, pct, pct]; }
+    else { tierDiscounts[tierIdx - 1] = pct; }
+    const tiers = calculateQuote();
+    renderComparisonTable(tiers);
+  }
+
+  function renderComparisonTable(tiers) {
+    const container = document.getElementById('comparisonTable');
+    if (!tiers || tiers.every(t => !t.enabled)) { container.classList.add('hidden'); return; }
+    container.classList.remove('hidden');
+    const t = tiers.filter(x => x.enabled);
+    let html = `<div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse mt-4">
+      <thead><tr class="border-b border-smg_gold/30">
+        <th class="py-2 px-3 text-smg_gold uppercase tracking-wider font-bold">${__('metric')}</th>`;
+    t.forEach(ti => { html += `<th class="py-2 px-3 text-white uppercase tracking-wider font-bold">${ti.name}</th>`; });
+    html += '</tr></thead><tbody>';
+
+    const rows = [
+      { label: __('setup_charge'), fn: ti => `€${ti.setupRev.toFixed(2)}` },
+      { label: __('monthly'), fn: ti => `€${ti.monthlyRev.toFixed(2)}` },
+      { label: __('setup_margin_s'), fn: ti => `${ti.setupMargin.toFixed(1)}%` },
+      { label: __('services_margin'), fn: ti => `${ti.svcMarginY1.toFixed(1)}%` },
+      { label: __('blended_margin'), fn: ti => `${ti.aggMargin.toFixed(1)}%` },
+      { label: __('term'), fn: ti => `${ti.term || 12} mo` },
+      { label: __('deposit'), fn: ti => `€${ti.deposit.toFixed(2)}` },
+    ];
+    rows.forEach(r => {
+      html += `<tr class="border-b border-smg_cream/10"><td class="py-1.5 px-3 text-smg_cream/80 font-medium">${r.label}</td>`;
+      t.forEach(ti => { html += `<td class="py-1.5 px-3 text-white">${r.fn(ti)}</td>`; });
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  }
+
+  function sendQuoteEmail() {
+    const name = document.getElementById('clientName').value || 'Client';
+    const email = document.getElementById('clientEmail').value;
+    if (!email) { alert(__('email_required')); return; }
+    const ref = 'SMG-' + Date.now().toString(36).toUpperCase();
+    const tiers = calculateQuote();
+    const term = document.getElementById('contractTerm').value;
+    const esc = document.getElementById('escalationToggle').checked ? `, ${document.getElementById('escalationPct').value}%/yr escalation` : '';
+    const notes = document.getElementById('internalNotes').value;
+    const summary = tiers.filter(t => t.enabled).map(t =>
+      `${t.name}: Setup €${t.setupRev.toFixed(2)} / Monthly €${t.monthlyRev.toFixed(2)} (Services margin ${t.svcMarginY1.toFixed(1)}%)`
+    ).join('\n');
+    let body = `Quote Reference: ${ref}\nClient: ${name}\nTerm: ${term}mo${esc}\n\n${summary}`;
+    if (notes) body += `\n\nInternal notes:\n${notes}`;
+    body += `\n\n---\nSMGTEC - Calle Iquique 18, 08918 Badalona, Barcelona\n${window.location.href}`;
+    const mailto = `mailto:${email}?subject=${encodeURIComponent(__('quote_subject') + ' ' + ref)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+  }
+
+  // =====================================================================
+  // 13. PDF GENERATION (jsPDF)
   // =====================================================================
   function generatePDF() {
     try {
@@ -1244,7 +1469,9 @@
       doc.setFontSize(7.5);
       doc.setTextColor(...darkTxt);
       const tNames = tiers.filter(t => t.enabled).map((_, i) => `Tier ${i+1}`).join(', ');
-      doc.text(`Pricing tiers: ${tNames || 'None'}  |  RGPD: ${document.getElementById('rgpdToggle').checked ? 'Yes' : 'No'}  |  NIS2: ${hasNis2 ? 'Yes' : 'No'}  |  IVA: ${document.getElementById('ivaRate').value === '1.21' ? '21%' : document.getElementById('ivaRate').value === '1.10' ? '10%' : 'Exempt'}`, margin + 3, y + 10);
+      const pdfTerm = document.getElementById('contractTerm').value;
+      const pdfEsc = document.getElementById('escalationToggle').checked ? ` (${document.getElementById('escalationPct').value}%/yr)` : '';
+      doc.text(`Pricing tiers: ${tNames || 'None'}  |  Term: ${pdfTerm}mo${pdfEsc}  |  RGPD: ${document.getElementById('rgpdToggle').checked ? 'Yes' : 'No'}  |  NIS2: ${hasNis2 ? 'Yes' : 'No'}  |  IVA: ${document.getElementById('ivaRate').value === '1.21' ? '21%' : document.getElementById('ivaRate').value === '1.10' ? '10%' : 'Exempt'}`, margin + 3, y + 10);
 
       // — Tier Tables (using autoTable) —
       y += 20;
@@ -1328,9 +1555,11 @@
         doc.text('Monthly Recurring', margin + 2, y + 3.5);
         y += 6;
 
+        const escActive = document.getElementById('escalationToggle').checked;
+        const tRevY2 = tier.monthlyRev * (escActive ? (1 + (parseFloat(document.getElementById('escalationPct').value)||0)/100) : 1);
         const monthlyItems = [
-          ['', 'Year 1', 'Year 2'],
-          ['Revenue', `€${tier.monthlyRev.toFixed(2)}/mo`, `€${tier.monthlyRev.toFixed(2)}/mo`],
+          ['', 'Year 1', escActive ? 'Year 2 (escalated)' : 'Year 2'],
+          ['Revenue', `€${tier.monthlyRev.toFixed(2)}/mo`, `€${tRevY2.toFixed(2)}/mo`],
           ['Cost', `€${tier.monthlyCostY1.toFixed(2)}/mo`, `€${tier.monthlyCostY2.toFixed(2)}/mo`],
           ['Profit', `€${tier.mProfitY1.toFixed(2)}/mo`, `€${tier.mProfitY2.toFixed(2)}/mo`],
           ['Blended Margin', `${tier.mMarginY1.toFixed(1)}%`, `${tier.mMarginY2.toFixed(1)}%`]
@@ -1411,15 +1640,19 @@
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(6.5);
       doc.setTextColor(...darkTxt);
+      const pdfTermVal = document.getElementById('contractTerm').value;
+      const pdfEscVal = document.getElementById('escalationToggle').checked;
+      const pdfEscPct = document.getElementById('escalationPct').value;
       const terms = [
         '50% hardware deposit due on contract signature; 50% on delivery and acceptance.',
         'Late payment penalty: 1.5% monthly on outstanding balance.',
-        'Minimum term: 12 months. Early termination: 50% of remaining contract value.',
+        `Minimum term: ${pdfTermVal} months. Early termination: 50% of remaining contract value.`,
+        pdfEscVal ? `Annual escalation: ${pdfEscPct}% per year applied from Year 2 onwards.` : '',
         `SLA: ${tiers.filter(t=>t.enabled).map((t,i)=>`Tier ${i+1} — ${i===0?'None':i===1?'10% rebate':'15% rebate'}`).join('; ')}.`,
         'All prices exclude applicable IVA (VAT). Prices valid 30 days from quote date.',
         `RGPD/LOPDGDD: ${document.getElementById('rgpdToggle').checked ? 'Included' : 'Not included'}.`,
         `IVA rate: ${document.getElementById('ivaRate').value === '1.21' ? '21% (Standard)' : document.getElementById('ivaRate').value === '1.10' ? '10% (Reduced)' : 'Exempt'}.`
-      ];
+      ].filter(Boolean);
       doc.text(terms.join('\n'), margin + 3, y + 11);
 
       // Approval banner
