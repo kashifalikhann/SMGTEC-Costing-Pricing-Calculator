@@ -914,8 +914,8 @@
     const r = ov ? ov.retail : retail;
     return `<div class="grid grid-cols-[2fr_1fr_1fr_auto] gap-1 items-center text-[10px] py-1 border-b border-smg_cream/5 group">
       <span class="font-medium text-smg_cream truncate" title="${label}">${label}</span>
-      <input type="number" step="0.01" value="${Number(w).toFixed(2)}" data-tier="${tier}" data-key="${key}" data-wholesale="1" class="w-full bg-slate-800 border border-smg_cream/20 rounded px-1 py-0.5 text-white font-mono text-[9px]" />
-      <input type="number" step="0.01" value="${Number(r).toFixed(2)}" data-tier="${tier}" data-key="${key}" data-wholesale="0" class="w-full bg-slate-800 border border-smg_cream/20 rounded px-1 py-0.5 text-white font-mono text-[9px]" />
+      <input type="number" step="0.01" value="${Number(w).toFixed(2)}" data-tier="${tier}" data-key="${key}" data-side="wholesale" class="line-item-override w-full bg-slate-800 border border-smg_cream/20 rounded px-1 py-0.5 text-white font-mono text-[9px]" />
+      <input type="number" step="0.01" value="${Number(r).toFixed(2)}" data-tier="${tier}" data-key="${key}" data-side="retail" class="line-item-override w-full bg-slate-800 border border-smg_cream/20 rounded px-1 py-0.5 text-white font-mono text-[9px]" />
       <button onclick="removeSingleItem(${tier},'${key}')" class="text-red-500/50 hover:text-red-400 px-1 py-0.5 rounded hover:bg-red-900/20 transition opacity-0 group-hover:opacity-100 text-[10px]" title="Remove item">✕</button>
     </div>`;
   }
