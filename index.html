@@ -86,6 +86,7 @@
         </span>
         <button onclick="openAdmin()" class="bg-smg_dark border border-smg_gold/40 text-smg_gold px-3 py-1.5 rounded-lg hover:bg-smg_gold/10 transition text-xs uppercase tracking-wider font-bold">Admin DB</button>
         <button onclick="generatePDF()" class="bg-smg_gold text-smg_dark px-3 py-1.5 rounded-lg font-bold hover:bg-yellow-400 transition text-xs uppercase tracking-wider">PDF Quote</button>
+        <button onclick="document.getElementById('userManual').scrollIntoView({behavior:'smooth'})" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg hover:bg-smg_cream/10 transition text-xs uppercase tracking-wider font-bold">Manual</button>
       </div>
     </header>
 
@@ -491,13 +492,20 @@
       t.mMarginY1 = t.monthlyRev > 0 ? (t.mProfitY1 / t.monthlyRev) * 100 : 0;
       t.mProfitY2 = t.monthlyRev - t.monthlyCostY2;
       t.mMarginY2 = t.monthlyRev > 0 ? (t.mProfitY2 / t.monthlyRev) * 100 : 0;
+      // Services-only metrics (excludes resold software licenses like M365/VoIP/Dropsuite)
+      t.svcCostY1 = t.monthlyCostY1 - (t.licCost || 0);
+      t.svcRev = t.monthlyRev - (t.licRev || 0);
+      t.svcMarginY1 = t.svcRev > 0 ? ((t.svcRev - t.svcCostY1) / t.svcRev) * 100 : 0;
       t.aggRevY1 = t.setupRev + (t.monthlyRev * 12);
       t.aggCostY1 = t.setupCost + (t.monthlyCostY1 * 12);
       t.aggProfit = t.aggRevY1 - t.aggCostY1;
       t.aggMargin = t.aggRevY1 > 0 ? (t.aggProfit / t.aggRevY1) * 100 : 0;
+      t.svcAggRevY1 = t.setupRev + (t.svcRev * 12);
+      t.svcAggCostY1 = t.setupCost + (t.svcCostY1 * 12);
+      t.svcAggMargin = t.svcAggRevY1 > 0 ? ((t.svcAggRevY1 - t.svcAggCostY1) / t.svcAggRevY1) * 100 : 0;
       t.withTaxSetup = applyIVA(t.setupRev);
       t.withTaxMonthly = applyIVA(t.monthlyRev);
-      t.approved = t.setupMargin >= 50 && t.mMarginY1 >= 50;
+      t.approved = t.setupMargin >= 40 && t.svcMarginY1 >= 40;
       t.deposit = t.setupRev * 0.5;
     }
 
@@ -514,6 +522,7 @@
       t1.monthlyCostY1 = (W * swCost('BACKBLAZE')) + (2 * labW('maint')) + lic.cost;
       t1.monthlyCostY2 = (W * swCost('MSP360')) + (W * swCost('BACKBLAZE')) + (2 * labW('maint')) + lic.cost;
       t1.monthlyRev = 199 + (10 * W_billing) + lic.retail;
+      t1.licCost = lic.cost; t1.licRev = lic.retail;
       if (itGlueForced) { t1.monthlyCostY1 += swCost('IT_GLUE'); t1.monthlyCostY2 += swCost('IT_GLUE'); t1.monthlyRev += swRetail('IT_GLUE'); }
       addCustomToTier(t1, 1);
       finalizeTier(t1);
@@ -532,6 +541,7 @@
     t2.monthlyCostY1 = (W * swCost('BACKBLAZE')) + (W * swCost('ESET')) + swCost('FORTIGUARD_UTM') + (3 * labW('maint')) + lic2.cost;
     t2.monthlyCostY2 = (W * swCost('MSP360')) + t2.monthlyCostY1;
     t2.monthlyRev = 299 + (20 * W_billing) + lic2.retail;
+    t2.licCost = lic2.cost; t2.licRev = lic2.retail;
     if (itGlueForced) { t2.monthlyCostY1 += swCost('IT_GLUE'); t2.monthlyCostY2 += swCost('IT_GLUE'); t2.monthlyRev += swRetail('IT_GLUE'); }
     addCustomToTier(t2, 2);
     finalizeTier(t2);
@@ -586,6 +596,7 @@
       t3.monthlyCostY2 += swCost('IT_GLUE');
       t3.monthlyRev += swRetail('IT_GLUE');
     }
+    t3.licCost = lic3.cost; t3.licRev = lic3.retail;
 
     addCustomToTier(t3, 3);
     finalizeTier(t3);
@@ -722,10 +733,11 @@
           </div>`;
         return;
       }
-      const setupPct = tier.setupMargin >= 50 ? 'text-emerald-400' : 'text-red-400';
-      const m1Pct = tier.mMarginY1 >= 50 ? 'text-emerald-400' : 'text-red-400';
-      const m2Pct = tier.mMarginY2 >= 50 ? 'text-emerald-400' : 'text-red-400';
-      const aggPct = tier.aggMargin >= 50 ? 'text-emerald-400' : 'text-red-400';
+      const setupPct = tier.setupMargin >= 40 ? 'text-emerald-400' : 'text-red-400';
+      const svcPct = tier.svcMarginY1 >= 40 ? 'text-emerald-400' : 'text-amber-400';
+      const m1Pct = tier.mMarginY1 >= 40 ? 'text-emerald-400' : 'text-red-400';
+      const m2Pct = tier.mMarginY2 >= 40 ? 'text-emerald-400' : 'text-red-400';
+      const aggPct = tier.svcAggMargin >= 40 ? 'text-emerald-400' : 'text-red-400';
       const approved = tier.approved;
       const sub = tier.subtitle || '';
 
@@ -794,7 +806,10 @@
                 <span>With IVA: <strong class="text-slate-300">€${tier.withTaxMonthly.toFixed(2)}</strong>/mo</span>
                 <span>SLA exposure: <strong class="text-slate-300">€${tier.sla.toFixed(2)}</strong>/event</span>
               </div>
-            </div>
+              <div class="flex justify-between text-[8px] text-slate-600 mt-0.5 pt-0.5 border-t border-slate-700/20">
+                <span>Services margin<span class="text-slate-700"> (excl. licenses)</span>: <strong class="${svcPct}">${tier.svcMarginY1.toFixed(1)}%</strong></span>
+                <span>Blended: <span class="text-slate-500">${tier.mMarginY1.toFixed(1)}%</span></span>
+              </div>
 
             <!-- ====== YEAR 1 AGGREGATE ====== -->
             <div>
@@ -811,14 +826,17 @@
                 <div><span class="text-slate-400">€${tier.aggCostY1.toFixed(2)}</span></div>
                 <div class="col-span-2"><span class="font-semibold ${aggPct}">€${tier.aggProfit.toFixed(2)} (${tier.aggMargin.toFixed(1)}%)</span></div>
               </div>
-              <!-- Progress bar -->
+              <!-- Progress bar (services aggregate) -->
               <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div class="h-2 rounded-full transition-all duration-300 ${tier.aggMargin >= 50 ? 'bg-emerald-400' : 'bg-red-400'}" style="width: ${Math.min(tier.aggMargin, 100)}%"></div>
+                <div class="h-2 rounded-full transition-all duration-300 ${tier.svcAggMargin >= 40 ? 'bg-emerald-400' : 'bg-red-400'}" style="width: ${Math.min(tier.svcAggMargin, 100)}%"></div>
               </div>
               <div class="flex justify-between text-[8px] text-slate-600 mt-0.5">
                 <span>0%</span>
-                <span class="font-bold ${aggPct}">${tier.aggMargin.toFixed(1)}% margin</span>
+                <span class="font-bold ${aggPct}">${tier.svcAggMargin.toFixed(1)}% svc margin</span>
                 <span>100%</span>
+              </div>
+              <div class="flex justify-end text-[7px] text-slate-700 mt-0.5">
+                <span>(blended: ${tier.aggMargin.toFixed(1)}%)</span>
               </div>
             </div>
 
@@ -931,7 +949,7 @@
     } else {
       badge.classList.remove('hidden');
       badge.className = 'bg-red-900/50 text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider';
-      badge.textContent = '⚠️ PENDING APPROVAL — margin below 50% threshold';
+      badge.textContent = '⚠️ PENDING APPROVAL — services margin below 40% threshold';
     }
   }
 
@@ -1271,7 +1289,7 @@
           ['Client Charge', `€${tier.setupRev.toFixed(2)}`, { halign: 'right' }],
           ['Cost', `€${tier.setupCost.toFixed(2)}`, { halign: 'right' }],
           ['Profit', `€${tier.setupProfit.toFixed(2)}`, { halign: 'right' }],
-          ['Margin', `${tier.setupMargin.toFixed(1)}%`, { halign: 'right', color: tier.setupMargin >= 50 ? greenTxt : redTxt }]
+           ['Margin', `${tier.setupMargin.toFixed(1)}%`, { halign: 'right', color: tier.setupMargin >= 40 ? greenTxt : redTxt }]
         ];
         doc.autoTable({
           startY: y,
@@ -1315,7 +1333,7 @@
           ['Revenue', `€${tier.monthlyRev.toFixed(2)}/mo`, `€${tier.monthlyRev.toFixed(2)}/mo`],
           ['Cost', `€${tier.monthlyCostY1.toFixed(2)}/mo`, `€${tier.monthlyCostY2.toFixed(2)}/mo`],
           ['Profit', `€${tier.mProfitY1.toFixed(2)}/mo`, `€${tier.mProfitY2.toFixed(2)}/mo`],
-          ['Margin', `${tier.mMarginY1.toFixed(1)}%`, `${tier.mMarginY2.toFixed(1)}%`]
+          ['Blended Margin', `${tier.mMarginY1.toFixed(1)}%`, `${tier.mMarginY2.toFixed(1)}%`]
         ];
         doc.autoTable({
           startY: y,
@@ -1333,11 +1351,17 @@
           didParseCell: function(data) {
             if (data.section === 'body' && data.row.index >= 4 && data.column.index > 0) {
               const val = parseFloat(data.cell.text[0]);
-              data.cell.textColor = val >= 50 ? greenTxt : redTxt;
+              data.cell.textColor = val >= 40 ? greenTxt : redTxt;
             }
           }
         });
         y = doc.lastAutoTable.finalY + 3;
+        // Services margin note
+        doc.setFontSize(6);
+        doc.setTextColor(...grayMid);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`Services margin (excl. software licenses): ${tier.svcMarginY1.toFixed(1)}% (threshold: 40%)`, margin + 2, y + 2.5);
+        y += 5;
 
         // IVA on monthly
         doc.setFontSize(6.5);
@@ -1403,11 +1427,11 @@
       if (approvedAll) {
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...greenTxt);
-        doc.text('✓ This quote is APPROVED — all margins meet the 50% threshold.', margin + 3, y + 44);
+        doc.text('✓ This quote is APPROVED — services margins meet the 40% threshold.', margin + 3, y + 44);
       } else {
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...redTxt);
-        doc.text('⚠ THIS QUOTE REQUIRES ADMIN APPROVAL — some margins are below the 50% threshold.', margin + 3, y + 44);
+        doc.text('⚠ THIS QUOTE REQUIRES ADMIN APPROVAL — services margins below the 40% threshold.', margin + 3, y + 44);
       }
 
       // — Page Footer — 
@@ -1476,5 +1500,349 @@
   checkHash();
   calculateQuote();
   </script>
+
+<!-- ===================================================================== -->
+<!-- 16. USER MANUAL (bottom of page)                                       -->
+<!-- ===================================================================== -->
+<div id="userManual" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 no-print">
+  <div class="border-t border-smg_cream/20 pt-10 mt-16">
+    <h2 class="text-2xl font-bold text-smg_gold tracking-wide flex items-center gap-3 mb-8">
+      <span class="text-3xl">📖</span> User Manual &amp; Reference
+    </h2>
+    <p class="text-sm text-smg_cream/60 mb-8 max-w-3xl">
+      This guide walks through every field, abbreviation, and calculation in the SMGTEC CPQ Engine from top to bottom.
+      Use it to understand how each input affects pricing, margins, and compliance.
+    </p>
+
+    <!-- 1. Overview -->
+    <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-5 mb-5">
+      <h3 class="text-sm font-bold text-smg_cream mb-3 flex items-center gap-2"><span class="bg-smg_gold text-smg_dark w-6 h-6 rounded-full text-xs flex items-center justify-center font-bold">1</span> What Is This Tool?</h3>
+      <p class="text-xs text-smg_cream/70 leading-relaxed">
+        The <strong class="text-smg_cream">SMGTEC CPQ Engine</strong> (Configure-Price-Quote) is an internal tool for generating managed IT service proposals.
+        It takes your client's infrastructure requirements, selects the appropriate service tier, applies SMGTEC's sourcing costs and retail pricing,
+        and produces a professional PDF quote ready to send. All costs come from the internal sourcing database and can be overridden per quote.
+        The engine enforces compliance (RGPD/LOPDGDD, NIS2), calculates IVA (Spanish VAT), deposit requirements, and margin thresholds.
+      </p>
+    </div>
+
+    <!-- 2. Header -->
+    <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-5 mb-5">
+      <h3 class="text-sm font-bold text-smg_cream mb-3 flex items-center gap-2"><span class="bg-smg_gold text-smg_dark w-6 h-6 rounded-full text-xs flex items-center justify-center font-bold">2</span> Header Bar</h3>
+      <div class="space-y-3 text-xs text-smg_cream/70">
+        <div class="flex gap-4 items-start">
+          <div class="w-32 shrink-0"><strong class="text-smg_gold">Labor Rate</strong></div>
+          <div>Shows the current <strong>wholesale</strong> (SMGTEC's cost) and <strong>retail</strong> (what the client pays) per-hour rates for engineering labour. These are managed in the <strong>Admin DB</strong> panel. Values shown: wholesale €/hr / retail €/hr.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-32 shrink-0"><strong class="text-smg_cream">Admin DB Button</strong></div>
+          <div>Opens the <strong>sourcing database</strong> sidebar. Password-protected (<code class="text-smg_gold">smg2024</code> by default, changeable in the panel). Use this to edit labour rates, hardware costs, and software license costs/retail prices that feed into all calculations.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-32 shrink-0"><strong class="text-smg_cream">PDF Quote Button</strong></div>
+          <div>Generates a professional multi-page PDF proposal with client info, tiered pricing, terms and conditions, compliance details, and approval status. Requires jsPDF and jsPDF-AutoTable (loaded from CDN).</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-32 shrink-0"><strong class="text-smg_cream">Manual Button</strong></div>
+          <div>Scrolls to this user manual. Always available at the top of the page.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Client Info -->
+    <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-5 mb-5">
+      <h3 class="text-sm font-bold text-smg_cream mb-3 flex items-center gap-2"><span class="bg-smg_gold text-smg_dark w-6 h-6 rounded-full text-xs flex items-center justify-center font-bold">3</span> Client Information</h3>
+      <div class="space-y-3 text-xs text-smg_cream/70">
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">Client Name / Company</strong></div>
+          <div>Full legal name of the client company. Appears on the PDF quote header.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">NIF / CIF</strong></div>
+          <div>Spanish tax identification number. <strong>NIF</strong> (Número de Identificación Fiscal) for individuals, <strong>CIF</strong> (Código de Identificación Fiscal) for companies. Required for all invoicing in Spain.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">Quote Date</strong></div>
+          <div>Date the quote is prepared. Defaults to today's date. The PDF shows this and prices are valid 30 days from this date.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">Email / Phone / Address</strong></div>
+          <div>Client contact details used for correspondence and included in the PDF proposal footer.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Action Bar -->
+    <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-5 mb-5">
+      <h3 class="text-sm font-bold text-smg_cream mb-3 flex items-center gap-2"><span class="bg-smg_gold text-smg_dark w-6 h-6 rounded-full text-xs flex items-center justify-center font-bold">4</span> Action Bar</h3>
+      <div class="space-y-3 text-xs text-smg_cream/70">
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">💾 Save Proposal</strong></div>
+          <div>Saves the entire current state (all inputs, overrides, selected tier, etc.) to the browser's <strong>localStorage</strong>. Data persists across sessions on the same device/browser.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">📂 Load Proposal</strong></div>
+          <div>Restores a previously saved proposal from localStorage. Prompts for confirmation before overwriting the current state.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">📥 Export JSON</strong></div>
+          <div>Downloads the full proposal state as a <code>.json</code> file. Useful for archiving, sharing between team members, or importing into other systems.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">🔗 Share Link</strong></div>
+          <div>Encodes the entire proposal state into the URL hash and copies the link to clipboard. Anyone opening this link will see the exact quote. <strong>Limit:</strong> very large proposals may exceed URL length limits.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">↺ Reset Items</strong></div>
+          <div>Resets all line-item overrides and custom additions back to defaults. Does not reset client info or input parameters.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong class="text-smg_gold">Approval Badge</strong></div>
+          <div>Shows <span class="text-emerald-400">✓ APPROVED</span> when all enabled tiers meet the margin threshold (services margin ≥ 40%), or <span class="text-red-400">⚠ PENDING</span> when any tier's services margin falls below 40%. The badge toggles dynamically as you adjust inputs.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Left Column — Inputs -->
+    <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-5 mb-5">
+      <h3 class="text-sm font-bold text-smg_cream mb-3 flex items-center gap-2"><span class="bg-smg_gold text-smg_dark w-6 h-6 rounded-full text-xs flex items-center justify-center font-bold">5</span> Left Column — Input Cards</h3>
+
+      <h4 class="text-xs font-bold text-smg_gold mt-4 mb-2 uppercase tracking-wider">5A. Client Infrastructure</h4>
+      <div class="space-y-2 text-xs text-smg_cream/70 mb-4">
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Desktop Workstations</strong></div>
+          <div>Number of physical desktop PCs at the client site. Affects per-workstation software licensing costs (Backblaze, ESET, SentinelOne, N-Central) and support labour hours.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Laptop Workstations</strong></div>
+          <div>Number of laptops. Treated identically to desktops for licensing and support — the tool adds both together as <strong>W</strong> (total workstations).</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Server Assessment</strong></div>
+          <div>
+            <strong class="text-smg_cream">Buy New Server</strong> — Recommends a Dell PowerEdge server (T150 for ≤15 users, T360 for 16+) with full warranty and Datto Siris backup appliance. Higher setup, full margin.<br>
+            <strong class="text-smg_cream">Retain Existing Server</strong> — Client keeps their current server. Adds Datto Siris backup only. Lower setup but may carry warranty risks.<br>
+            <strong class="text-smg_cream">Cloud Transition</strong> — No on-prem server. All services are cloud-delivered. Lowest setup cost, minimal hardware margin.
+          </div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Expired Warranty</strong></div>
+          <div>Check this if the client's existing hardware is out of warranty or EOL (End of Life). Triggers a warning banner recommending refresh or ProSupport extension.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Override Server Count</strong></div>
+          <div>Manually specify the number of physical servers if the auto-detection from workstation count is incorrect.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Existing Workstations</strong></div>
+          <div>Number of workstations already covered under a different contract. Used for migration scenarios where only new workstations need setup.</div>
+        </div>
+      </div>
+
+      <h4 class="text-xs font-bold text-smg_gold mt-4 mb-2 uppercase tracking-wider">5B. Compliance &amp; Taxation</h4>
+      <div class="space-y-2 text-xs text-smg_cream/70 mb-4">
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>RGPD / LOPDGDD</strong></div>
+          <div><strong>RGPD</strong> — Reglamento General de Protección de Datos (EU GDPR). <strong>LOPDGDD</strong> — Ley Orgánica de Protección de Datos y Garantía de Derechos Digitales (Spanish GDPR implementation). When enabled, adds data protection compliance documentation labour (+5 hours setup) and is noted in the proposal's compliance section.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>NIS2</strong></div>
+          <div><strong>NIS2 Directive</strong> — EU cybersecurity directive for critical and essential entities. When enabled with "Critical Sector," Tier 1 is blocked (insufficient security). When enabled with "Important Sector," all tiers are allowed but SentinelOne EDR pricing is multiplied by 2.5x for enhanced detection coverage.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>IVA Rate</strong></div>
+          <div><strong>IVA</strong> — Impuesto sobre el Valor Añadido (Spanish VAT). Three rates: <strong>21%</strong> standard, <strong>10%</strong> reduced (some services), <strong>Exempt</strong> (certain B2B services). Applied to all prices shown (setup + monthly). The PDF shows "IVA included" pricing separately.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>IT Glue</strong></div>
+          <div>Documentation platform for IT documentation. When forced on, adds IT Glue licensing costs to all tiers. Can be toggled from the admin panel's software section.</div>
+        </div>
+      </div>
+
+      <h4 class="text-xs font-bold text-smg_gold mt-4 mb-2 uppercase tracking-wider">5C. Licensing &amp; Sourcing</h4>
+      <div class="space-y-2 text-xs text-smg_cream/70 mb-4">
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>M365 Licenses</strong></div>
+          <div><strong>Microsoft 365</strong> (formerly Office 365). Enter the number of Business Premium and Business Basic licenses needed. These are resold through SMGTEC — they carry cost and retail pricing from the sourcing DB and are included in all tiers' monthly recurring costs/revenue.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Dropsuite</strong></div>
+          <div>Email backup and archiving solution. Licensed per mailbox. Resold through SMGTEC similarly to M365.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>VoIP / 3CX</strong></div>
+          <div><strong>VoIP</strong> — Voice over IP phone system using <strong>3CX</strong> platform. Enter the number of extensions needed. Resold license with cost/retail from sourcing DB.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>+ Item Button</strong></div>
+          <div>Each section header has a <span class="text-smg_gold">+ Item</span> button. Clicking it adds a custom line item to every tier's line-item override grid, keyed to that section (Infra / Compliance / Licensing). Used for one-off items not in the standard catalog.</div>
+        </div>
+      </div>
+
+      <h4 class="text-xs font-bold text-smg_gold mt-4 mb-2 uppercase tracking-wider">5D. Custom Sourcing Injector &amp; Line-Item Override Grid</h4>
+      <div class="space-y-2 text-xs text-smg_cream/70">
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Add from Catalog</strong></div>
+          <div>Dropdown + "Add to Tier" button that lets you insert any item from the admin sourcing database into a specific tier's pricing. Items appear in that tier's override grid where you can override cost/retail.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Line-Item Grid</strong></div>
+          <div>The table at the bottom showing <strong>Item</strong>, <strong>Cost (Wholesale)</strong>, and <strong>Price (Retail)</strong> for every line item across all tiers. You can override any value by typing directly into the grid. Overrides persist until you click "Reset Items."</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>✕ Remove Button</strong></div>
+          <div>Hover over any row in the line-item grid to reveal a red ✕ that removes that item from the tier. Removed items can be re-added via "Add from Catalog."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Right Column — Dashboard -->
+    <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-5 mb-5">
+      <h3 class="text-sm font-bold text-smg_cream mb-3 flex items-center gap-2"><span class="bg-smg_gold text-smg_dark w-6 h-6 rounded-full text-xs flex items-center justify-center font-bold">6</span> Right Column — Dashboard &amp; Tiers</h3>
+
+      <h4 class="text-xs font-bold text-smg_gold mt-4 mb-2 uppercase tracking-wider">6A. Warning Banners</h4>
+      <div class="space-y-2 text-xs text-smg_cream/70 mb-4">
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Minimum Billing</strong></div>
+          <div>If total workstations <strong>W</strong> is between 1 and 9, a warning reminds that the minimum billing is 10 seats. The pricing still computes but with a service advisory.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>NIS2 Block</strong></div>
+          <div>When NIS2 is active and set to "Critical Sector," Tier 1 is disabled with a note that it does not meet minimum security requirements.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Warranty Warning</strong></div>
+          <div>Shown when Expired Warranty is checked or a "Retain Existing Server" assessment is selected. Advises hardware refresh or warranty extension.</div>
+        </div>
+      </div>
+
+      <h4 class="text-xs font-bold text-smg_gold mt-4 mb-2 uppercase tracking-wider">6B. Service Tiers</h4>
+      <div class="space-y-4 text-xs text-smg_cream/70">
+        <div class="bg-slate-800/40 rounded-lg p-3 border border-smg_cream/10">
+          <strong class="text-amber-400">Tier 1: Data Protection</strong>
+          <span class="text-smg_cream/50 italic ml-2">Bare Bones Profile</span>
+          <p class="mt-1">Minimum viable protection. Includes Backblaze cloud backup, basic monitoring, and 2 hours/month maintenance. <strong>SLA:</strong> None (best effort). <strong>Best for:</strong> Very small businesses on a tight budget where basic data backup is the primary concern.</p>
+        </div>
+        <div class="bg-slate-800/40 rounded-lg p-3 border border-smg_cream/10">
+          <strong class="text-blue-400">Tier 2: Active Perimeter</strong>
+          <span class="text-smg_cream/50 italic ml-2">Security Protected Setup</span>
+          <p class="mt-1">Adds FortiGate 60F firewall with UTM subscription, ESET antivirus, and 3 hours/month maintenance. <strong>SLA:</strong> 10% rebate on monthly fee per incident. <strong>Best for:</strong> SMBs needing a proper security perimeter with UTM (Unified Threat Management).</p>
+        </div>
+        <div class="bg-slate-800/40 rounded-lg p-3 border border-smg_cream/10">
+          <strong class="text-emerald-400">Tier 3: Fully Protected</strong>
+          <span class="text-smg_cream/50 italic ml-2">Centralization &amp; Continuity</span>
+          <p class="mt-1">Full stack: Server (buy/retain/cloud), Datto Siris BDR, APC UPS, FortiGate, SentinelOne EDR, N-Central RMM, 5 hours/month maintenance. <strong>SLA:</strong> 15% rebate. <strong>Best for:</strong> Organizations requiring full infrastructure, disaster recovery, and maximum protection.</p>
+        </div>
+      </div>
+
+      <h4 class="text-xs font-bold text-smg_gold mt-4 mb-2 uppercase tracking-wider">6C. Per-Tier Dashboard Metrics</h4>
+      <div class="space-y-2 text-xs text-smg_cream/70">
+        <div class="flex gap-4 items-start">
+          <div class="w-40 shrink-0"><strong>One-Time Setup</strong></div>
+          <div>Non-recurring costs and revenue for initial deployment: <strong>Charge</strong> (what the client pays), <strong>Cost</strong> (SMGTEC's wholesale), <strong>Profit/Margin</strong> (€ and %). Emerald = margin ≥ 40%, Red = below threshold. Also shows <strong>IVA-included</strong> total and <strong>50% deposit</strong> due on signature.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-40 shrink-0"><strong>Monthly Recurring</strong></div>
+          <div>Ongoing monthly charges split into <strong>Y1</strong> (Year 1, includes some intro pricing and setup costs like Backblaze seeding) and <strong>Y2+</strong> (recurring steady state with full stack). Each shows revenue, cost, profit, and margin %. Below the blended margin, you'll see <strong>Services margin</strong> (excluding resold software licenses) — this is the number used for the approval threshold.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-40 shrink-0"><strong>Year 1 Aggregate</strong></div>
+          <div>Total revenue, cost, profit, and <strong>services margin</strong> for the first full year (setup + 12 months). Visual progress bar turns emerald ≥ 40%, red below. The blended margin (including software) is shown in smaller text below the bar.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-40 shrink-0"><strong>✓ APPROVED / ! PENDING</strong></div>
+          <div>Shown in each card header. <span class="text-emerald-400">Green</span> = setup margin ≥ 40% AND services margin ≥ 40%. <span class="text-red-400">Red</span> = one or both below threshold. The global approval badge at the top turns red if any enabled tier is pending.</div>
+        </div>
+      </div>
+
+      <h4 class="text-xs font-bold text-smg_gold mt-4 mb-2 uppercase tracking-wider">6D. Compliance &amp; Risk Summary</h4>
+      <div class="space-y-2 text-xs text-smg_cream/70">
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Deposit</strong></div>
+          <div>50% of the setup fee due on contract signature. The remaining 50% is due on delivery and acceptance. Standard practice for hardware-heavy IT projects in Spain.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>SLA Penalty</strong></div>
+          <div><strong>SLA</strong> — Service Level Agreement. Tier 1 has no SLA (best effort). Tier 2 penalises 10% of monthly fee per breach. Tier 3 penalises 15%. Shows as exposure per event.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Early Exit Penalty</strong></div>
+          <div>If the client terminates before 12 months, they owe 50% of the remaining contract value. Shown in the compliance footer.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. PDF Quote -->
+    <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-5 mb-5">
+      <h3 class="text-sm font-bold text-smg_cream mb-3 flex items-center gap-2"><span class="bg-smg_gold text-smg_dark w-6 h-6 rounded-full text-xs flex items-center justify-center font-bold">7</span> PDF Quote Output</h3>
+      <div class="space-y-2 text-xs text-smg_cream/70">
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Header</strong></div>
+          <div>Company logo area with SMGTEC letterhead, proposal title, unique quote ID (auto-generated), and issue date.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Client Info Box</strong></div>
+          <div>Client name, NIF/CIF, address, and contact details as entered in the input fields.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Tier Tables</strong></div>
+          <div>Each enabled tier is shown with its own table: one-time setup breakdown, monthly recurring table (Year 1 vs Year 2), and Year 1 aggregate summary. Margin percentages are colour-coded green (≥ 40%) or red.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Services Margin Note</strong></div>
+          <div>Each tier's monthly table shows the <strong>services margin</strong> (excluding resold software licenses like M365, VoIP, Dropsuite) with a note that the threshold is 40%.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Contract Terms</strong></div>
+          <div>Standard terms box with gold border: hardware deposit terms, late payment penalty (1.5%/mo), minimum 12-month term, early termination (50% of remaining), SLA details, IVA rate used, and RGPD compliance status.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Approval Banner</strong></div>
+          <div>Green banner with check mark if all tiers approved (services margin ≥ 40%), or red warning banner if any tier requires admin approval.</div>
+        </div>
+        <div class="flex gap-4 items-start">
+          <div class="w-36 shrink-0"><strong>Footer</strong></div>
+          <div>SMGTEC company details, NIF, address, quote number, page X of Y, and generation date — repeated on every page.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Glossary -->
+    <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-5">
+      <h3 class="text-sm font-bold text-smg_cream mb-3 flex items-center gap-2"><span class="bg-smg_gold text-smg_dark w-6 h-6 rounded-full text-xs flex items-center justify-center font-bold">8</span> Glossary of Terms &amp; Abbreviations</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs text-smg_cream/70">
+        <div><strong class="text-smg_cream">3CX</strong> — Software-based PBX phone system platform (VoIP)</div>
+        <div><strong class="text-smg_cream">APC UPS</strong> — APC Uninterruptible Power Supply for server protection</div>
+        <div><strong class="text-smg_cream">BDR</strong> — Backup and Disaster Recovery (Datto Siris)</div>
+        <div><strong class="text-smg_cream">CIF</strong> — Código de Identificación Fiscal (Spanish company tax ID)</div>
+        <div><strong class="text-smg_cream">CPQ</strong> — Configure-Price-Quote engine</div>
+        <div><strong class="text-smg_cream">Datto Siris</strong> — Hybrid cloud BDR appliance for servers</div>
+        <div><strong class="text-smg_cream">EDR</strong> — Endpoint Detection &amp; Response (SentinelOne)</div>
+        <div><strong class="text-smg_cream">EOL</strong> — End of Life (hardware no longer supported by manufacturer)</div>
+        <div><strong class="text-smg_cream">ESET</strong> — Antivirus/endpoint protection platform</div>
+        <div><strong class="text-smg_cream">FortiGate 60F</strong> — Firewall appliance with UTM capabilities</div>
+        <div><strong class="text-smg_cream">FortiGuard UTM</strong> — Unified Threat Management subscription (IPS, web filtering, antivirus)</div>
+        <div><strong class="text-smg_cream">IVA</strong> — Impuesto sobre el Valor Añadido (Spanish VAT, 21%/10%/exempt)</div>
+        <div><strong class="text-smg_cream">IT Glue</strong> — IT documentation and password management platform</div>
+        <div><strong class="text-smg_cream">LOPDGDD</strong> — Spanish GDPR implementation law</div>
+        <div><strong class="text-smg_cream">M365</strong> — Microsoft 365 (formerly Office 365) cloud productivity suite</div>
+        <div><strong class="text-smg_cream">MSP360</strong> — Backup software (used in Y2+ for cost optimization)</div>
+        <div><strong class="text-smg_cream">N-Central</strong> — Remote Monitoring &amp; Management (RMM) platform by N-able</div>
+        <div><strong class="text-smg_cream">NIF</strong> — Número de Identificación Fiscal (Spanish tax ID)</div>
+        <div><strong class="text-smg_cream">NIS2</strong> — EU Network and Information Security Directive 2</div>
+        <div><strong class="text-smg_cream">RGPD</strong> — Reglamento General de Protección de Datos (EU GDPR)</div>
+        <div><strong class="text-smg_cream">RMM</strong> — Remote Monitoring &amp; Management platform</div>
+        <div><strong class="text-smg_cream">SentinelOne</strong> — Next-gen AV/EDR platform (S1 Complete)</div>
+        <div><strong class="text-smg_cream">SLA</strong> — Service Level Agreement (penalty terms for service breaches)</div>
+        <div><strong class="text-smg_cream">SMGTEC</strong> — SMG Tecnología SL. MSP based in Badalona, Barcelona</div>
+        <div><strong class="text-smg_cream">S</strong> — Server count (used in tier 3 per-server licensing)</div>
+        <div><strong class="text-smg_cream">UTM</strong> — Unified Threat Management (firewall + security subscription)</div>
+        <div><strong class="text-smg_cream">VoIP</strong> — Voice over IP (telephone over internet)</div>
+        <div><strong class="text-smg_cream">W</strong> — Total Workstations (desktops + laptops)</div>
+        <div><strong class="text-smg_cream">W_billing</strong> — Billable workstations (max of W or 10, for minimum billing)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
