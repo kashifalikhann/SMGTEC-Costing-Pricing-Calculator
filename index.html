@@ -1197,7 +1197,7 @@
         doc.setFontSize(9);
         doc.setTextColor(...dark);
         doc.text(`TIER ${idx+1}: ${tier.name}`, margin + 2, y + 5.5);
-        doc.setTextColor(tier.approved ? [0, 150, 80] : [200, 50, 50]);
+        doc.setTextColor(...(tier.approved ? [0, 150, 80] : [200, 50, 50]));
         doc.setFontSize(7);
         doc.text(tier.approved ? 'APPROVED' : 'PENDING APPROVAL', pageW - margin - 25, y + 5.5);
         y += 11;
