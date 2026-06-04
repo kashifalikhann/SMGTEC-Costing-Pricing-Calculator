@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SMGTEC Internal CPQ Engine</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -1141,139 +1141,138 @@
   // 12. PDF GENERATION (jsPDF)
   // =====================================================================
   function generatePDF() {
-    const tiers = calculateQuote();
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    const pageW = 210;
-    const margin = 15;
-    const contentW = pageW - 2 * margin;
-    let y = margin;
+    try {
+      const tiers = calculateQuote();
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF library failed to load. Check network connection and disable ad blockers.');
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageW = 210;
+      const margin = 15;
+      const contentW = pageW - 2 * margin;
+      let y = margin;
 
-    // Colors
-    const gold = [212, 175, 55];
-    const dark = [27, 53, 59];
-    const cream = [229, 213, 188];
+      const gold = [212, 175, 55];
+      const dark = [27, 53, 59];
+      const cream = [229, 213, 188];
 
-    // Header
-    doc.setFillColor(...dark);
-    doc.rect(0, 0, pageW, 35, 'F');
-    doc.setTextColor(...gold);
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('SMGTEC SL', margin, 18);
-    doc.setFontSize(8);
-    doc.setTextColor(...cream);
-    doc.text('Barcelona — Official Pricing Proposal', margin, 25);
-    doc.setFontSize(7);
-    doc.setTextColor(180, 170, 160);
-    doc.text(`Quote #${quoteId}  |  ${document.getElementById('quoteDate').value || new Date().toISOString().split('T')[0]}`, margin, 31);
-
-    // Client info
-    y = 42;
-    doc.setTextColor(50, 50, 50);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Client:', margin, y);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text(`${document.getElementById('clientName').value || '[Client Name]'}  |  NIF: ${document.getElementById('clientNIF').value || '[NIF]'}`, margin + 20, y);
-    y += 6;
-    const ce = document.getElementById('clientEmail').value || '';
-    const cp = document.getElementById('clientPhone').value || '';
-    doc.text(`Contact: ${ce}${cp ? '  |  ' + cp : ''}`, margin + 20, y);
-
-    // Tiers
-    y += 10;
-    const approvedAll = tiers.every(t => !t.enabled || t.approved);
-
-    tiers.forEach((tier, idx) => {
-      if (!tier.enabled) return;
-      if (y > 230) { doc.addPage(); y = margin; }
-
-      doc.setFillColor(245, 245, 240);
-      doc.rect(margin, y, contentW, 8, 'F');
+      doc.setFillColor(...dark);
+      doc.rect(0, 0, pageW, 35, 'F');
+      doc.setTextColor(...gold);
+      doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(...dark);
-      doc.text(`TIER ${idx+1}: ${tier.name}`, margin + 2, y + 5.5);
-      doc.setTextColor(tier.approved ? [0, 150, 80] : [200, 50, 50]);
+      doc.text('SMGTEC SL', margin, 18);
+      doc.setFontSize(8);
+      doc.setTextColor(...cream);
+      doc.text('Barcelona — Official Pricing Proposal', margin, 25);
       doc.setFontSize(7);
-      doc.text(tier.approved ? 'APPROVED' : 'PENDING APPROVAL', pageW - margin - 25, y + 5.5);
-      y += 11;
+      doc.setTextColor(180, 170, 160);
+      doc.text(`Quote #${quoteId}  |  ${document.getElementById('quoteDate').value || new Date().toISOString().split('T')[0]}`, margin, 31);
 
-      // Setup table
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setDrawColor(200, 200, 200);
-      doc.line(margin, y, pageW - margin, y);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Setup', margin + 1, y + 4);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Client Charge: €${tier.setupRev.toFixed(2)}`, margin + 30, y + 4);
-      doc.text(`Cost: €${tier.setupCost.toFixed(2)}`, margin + 70, y + 4);
-      doc.text(`Margin: ${tier.setupMargin.toFixed(1)}%`, margin + 100, y + 4);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`IVA: €${tier.withTaxSetup.toFixed(2)}`, margin + 140, y + 4);
+      y = 42;
       doc.setTextColor(50, 50, 50);
-      y += 6;
-
-      // Monthly table
-      doc.setDrawColor(220, 220, 220);
-      doc.line(margin, y, pageW - margin, y);
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text('Monthly', margin + 1, y + 4);
+      doc.text('Client:', margin, y);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Client Charge: €${tier.monthlyRev.toFixed(2)}/mo`, margin + 30, y + 4);
-      doc.text(`Yr1 Cost: €${tier.monthlyCostY1.toFixed(2)}/mo`, margin + 70, y + 4);
-      doc.text(`Yr1 Margin: ${tier.mMarginY1.toFixed(1)}%`, margin + 100, y + 4);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`IVA: €${tier.withTaxMonthly.toFixed(2)}/mo`, margin + 140, y + 4);
-      doc.setTextColor(50, 50, 50);
+      doc.setFontSize(9);
+      doc.text(`${document.getElementById('clientName').value || '[Client Name]'}  |  NIF: ${document.getElementById('clientNIF').value || '[NIF]'}`, margin + 20, y);
       y += 6;
+      const ce = document.getElementById('clientEmail').value || '';
+      const cp = document.getElementById('clientPhone').value || '';
+      doc.text(`Contact: ${ce}${cp ? '  |  ' + cp : ''}`, margin + 20, y);
 
-      // Year 1 aggregate
-      doc.setDrawColor(230, 230, 230);
-      doc.line(margin, y, pageW - margin, y);
-      doc.text(`Year 1 Aggregate: Revenue €${tier.aggRevY1.toFixed(2)}  |  Cost €${tier.aggCostY1.toFixed(2)}  |  Profit €${tier.aggProfit.toFixed(2)}  |  Margin ${tier.aggMargin.toFixed(1)}%`, margin + 1, y + 4);
-      y += 8;
-    });
+      y += 10;
+      const approvedAll = tiers.every(t => !t.enabled || t.approved);
 
-    // Footer — contract terms
-    if (y > 220) doc.addPage();
-    y = Math.max(y, 230);
-    doc.setDrawColor(...dark);
-    doc.setFillColor(245, 245, 240);
-    doc.rect(margin, y, contentW, 35, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    doc.setTextColor(...dark);
-    doc.text('CONTRACT TERMS & COMPLIANCE', margin + 2, y + 4);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(6.5);
-    doc.setTextColor(80, 80, 80);
-    doc.text([
-      '• 50% upfront hardware deposit due on contract signature; 50% on delivery and acceptance.',
-      '• Late payment penalty: 1.5% monthly on outstanding balance.',
-      '• Minimum contract term: 12 months. Early termination: 50% of remaining contract value.',
-      '• SLA penalties: Tier 1 — none; Tier 2 — 10% of monthly fee per breach; Tier 3 — 15% of monthly fee per breach.',
-      '• All prices exclude applicable IVA (VAT). Prices valid for 30 days from quote date.',
-      `• RGPD/LOPDGDD compliance: ${document.getElementById('rgpdToggle').checked ? 'Included' : 'Not included'}`,
-      `• IVA Rate: ${document.getElementById('ivaRate').value === '1.21' ? '21% Standard' : document.getElementById('ivaRate').value === '1.10' ? '10% Reduced' : 'Exempt'}`
-    ].join('\n'), margin + 2, y + 9);
+      tiers.forEach((tier, idx) => {
+        if (!tier.enabled) return;
+        if (y > 230) { doc.addPage(); y = margin; }
 
-    // Footer
-    doc.setFontSize(6);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Generated by SMGTEC Internal CPQ Engine  |  Quote ID: ${quoteId}  |  ${new Date().toISOString().split('T')[0]}`, margin, 275);
+        doc.setFillColor(245, 245, 240);
+        doc.rect(margin, y, contentW, 8, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...dark);
+        doc.text(`TIER ${idx+1}: ${tier.name}`, margin + 2, y + 5.5);
+        doc.setTextColor(tier.approved ? [0, 150, 80] : [200, 50, 50]);
+        doc.setFontSize(7);
+        doc.text(tier.approved ? 'APPROVED' : 'PENDING APPROVAL', pageW - margin - 25, y + 5.5);
+        y += 11;
 
-    // Disclainer if not approved
-    if (!approvedAll) {
-      doc.setTextColor(200, 50, 50);
-      doc.setFontSize(8);
-      doc.text('⚠️ THIS QUOTE REQUIRES ADMIN APPROVAL — margins below 50% threshold', margin, 268);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, y, pageW - margin, y);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Setup', margin + 1, y + 4);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Client Charge: €${tier.setupRev.toFixed(2)}`, margin + 30, y + 4);
+        doc.text(`Cost: €${tier.setupCost.toFixed(2)}`, margin + 70, y + 4);
+        doc.text(`Margin: ${tier.setupMargin.toFixed(1)}%`, margin + 100, y + 4);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`IVA: €${tier.withTaxSetup.toFixed(2)}`, margin + 140, y + 4);
+        doc.setTextColor(50, 50, 50);
+        y += 6;
+
+        doc.setDrawColor(220, 220, 220);
+        doc.line(margin, y, pageW - margin, y);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Monthly', margin + 1, y + 4);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Client Charge: €${tier.monthlyRev.toFixed(2)}/mo`, margin + 30, y + 4);
+        doc.text(`Yr1 Cost: €${tier.monthlyCostY1.toFixed(2)}/mo`, margin + 70, y + 4);
+        doc.text(`Yr1 Margin: ${tier.mMarginY1.toFixed(1)}%`, margin + 100, y + 4);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`IVA: €${tier.withTaxMonthly.toFixed(2)}/mo`, margin + 140, y + 4);
+        doc.setTextColor(50, 50, 50);
+        y += 6;
+
+        doc.setDrawColor(230, 230, 230);
+        doc.line(margin, y, pageW - margin, y);
+        doc.text(`Year 1 Aggregate: Revenue €${tier.aggRevY1.toFixed(2)}  |  Cost €${tier.aggCostY1.toFixed(2)}  |  Profit €${tier.aggProfit.toFixed(2)}  |  Margin ${tier.aggMargin.toFixed(1)}%`, margin + 1, y + 4);
+        y += 8;
+      });
+
+      if (y > 220) doc.addPage();
+      y = Math.max(y, 230);
+      doc.setDrawColor(...dark);
+      doc.setFillColor(245, 245, 240);
+      doc.rect(margin, y, contentW, 35, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(...dark);
+      doc.text('CONTRACT TERMS & COMPLIANCE', margin + 2, y + 4);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(80, 80, 80);
+      doc.text([
+        '• 50% upfront hardware deposit due on contract signature; 50% on delivery and acceptance.',
+        '• Late payment penalty: 1.5% monthly on outstanding balance.',
+        '• Minimum contract term: 12 months. Early termination: 50% of remaining contract value.',
+        '• SLA penalties: Tier 1 — none; Tier 2 — 10% of monthly fee per breach; Tier 3 — 15% of monthly fee per breach.',
+        '• All prices exclude applicable IVA (VAT). Prices valid for 30 days from quote date.',
+        `• RGPD/LOPDGDD compliance: ${document.getElementById('rgpdToggle').checked ? 'Included' : 'Not included'}`,
+        `• IVA Rate: ${document.getElementById('ivaRate').value === '1.21' ? '21% Standard' : document.getElementById('ivaRate').value === '1.10' ? '10% Reduced' : 'Exempt'}`
+      ].join('\n'), margin + 2, y + 9);
+
+      doc.setFontSize(6);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Generated by SMGTEC Internal CPQ Engine  |  Quote ID: ${quoteId}  |  ${new Date().toISOString().split('T')[0]}`, margin, 275);
+
+      if (!approvedAll) {
+        doc.setTextColor(200, 50, 50);
+        doc.setFontSize(8);
+        doc.text('⚠️ THIS QUOTE REQUIRES ADMIN APPROVAL — margins below 50% threshold', margin, 268);
+      }
+
+      doc.save(`SMGTEC_Quote_${quoteId}.pdf`);
+    } catch (e) {
+      alert('PDF generation failed: ' + e.message + '\n\nCheck browser console for details.');
+      console.error('PDF Error:', e);
     }
-
-    doc.save(`SMGTEC_Quote_${quoteId}.pdf`);
   }
 
   // =====================================================================
