@@ -39,34 +39,34 @@
   <!-- ===== ADMIN SIDEBAR (Off-canvas) ===== -->
   <div id="adminSidebar" class="fixed top-0 right-0 h-full w-full max-w-lg bg-slate-800 border-l border-smg_cream/20 z-50 transform translate-x-full transition-transform duration-300 overflow-y-auto shadow-2xl">
     <div class="sticky top-0 bg-slate-800 z-10 border-b border-smg_cream/20 p-4 flex justify-between items-center">
-      <h2 class="text-lg font-bold text-smg_gold uppercase tracking-wider">Admin — Sourcing Database</h2>
-      <button onclick="closeAdmin()" class="text-smg_cream/60 hover:text-smg_cream text-xl">&times;</button>
+      <h2 class="text-lg font-bold text-smg_gold uppercase tracking-wider" data-i18n="admin_sourcing_database">Admin — Sourcing Database</h2>
+      <button onclick="closeAdmin()" class="text-smg_cream/60 hover:text-smg_cream text-xl" data-i18n="times">&times;</button>
     </div>
     <div class="p-4 space-y-6 text-sm">
       <div id="adminLock" class="text-center py-12">
-        <p class="text-smg_cream/60 mb-4">Enter admin password to edit sourcing data</p>
+        <p class="text-smg_cream/60 mb-4" data-i18n="enter_admin_password_to_edit_sourci">Enter admin password to edit sourcing data</p>
         <input type="password" id="adminPassword" placeholder="Password" class="bg-slate-900 border border-smg_cream/30 rounded px-3 py-2 text-white text-center w-48">
-        <button onclick="unlockAdmin()" class="block mx-auto mt-3 bg-smg_gold text-smg_dark px-6 py-2 rounded font-bold text-sm hover:bg-yellow-400 transition">Unlock</button>
-        <p id="adminError" class="text-red-400 text-xs mt-2 hidden">Incorrect password</p>
+        <button onclick="unlockAdmin()" class="block mx-auto mt-3 bg-smg_gold text-smg_dark px-6 py-2 rounded font-bold text-sm hover:bg-yellow-400 transition" data-i18n="unlock">Unlock</button>
+        <p id="adminError" class="text-red-400 text-xs mt-2 hidden" data-i18n="incorrect_password">Incorrect password</p>
       </div>
       <div id="adminContent" class="hidden space-y-6">
         <div>
-          <h3 class="text-smg_gold font-bold uppercase text-xs tracking-wider mb-2">Labor Rates (€/hr)</h3>
+          <h3 class="text-smg_gold font-bold uppercase text-xs tracking-wider mb-2" data-i18n="labor_rates_hr">Labor Rates (€/hr)</h3>
           <div class="grid grid-cols-2 gap-3">
-            <div><label class="text-xs text-smg_cream/60">Wholesale Setup/Maint</label><input type="number" id="admin_labor_cost" class="w-full bg-slate-900 border border-smg_cream/20 rounded px-2 py-1 text-white text-sm"></div>
-            <div><label class="text-xs text-smg_cream/60">Retail Rate</label><input type="number" id="admin_labor_retail" class="w-full bg-slate-900 border border-smg_cream/20 rounded px-2 py-1 text-white text-sm"></div>
+            <div><label class="text-xs text-smg_cream/60" data-i18n="wholesale_setup_maint">Wholesale Setup/Maint</label><input type="number" id="admin_labor_cost" class="w-full bg-slate-900 border border-smg_cream/20 rounded px-2 py-1 text-white text-sm"></div>
+            <div><label class="text-xs text-smg_cream/60" data-i18n="retail_rate">Retail Rate</label><input type="number" id="admin_labor_retail" class="w-full bg-slate-900 border border-smg_cream/20 rounded px-2 py-1 text-white text-sm"></div>
           </div>
         </div>
         <div>
-          <h3 class="text-smg_gold font-bold uppercase text-xs tracking-wider mb-2">Hardware Costs</h3>
+          <h3 class="text-smg_gold font-bold uppercase text-xs tracking-wider mb-2" data-i18n="hardware_costs">Hardware Costs</h3>
           <div id="adminHardwareGrid" class="space-y-2"></div>
         </div>
         <div>
-          <h3 class="text-smg_gold font-bold uppercase text-xs tracking-wider mb-2">Software Licenses (€/mo)</h3>
+          <h3 class="text-smg_gold font-bold uppercase text-xs tracking-wider mb-2" data-i18n="software_licenses_mo">Software Licenses (€/mo)</h3>
           <div id="adminSoftwareGrid" class="space-y-2"></div>
         </div>
-        <button onclick="saveAdminConfig()" class="w-full bg-emerald-600 text-white py-2 rounded font-bold text-sm hover:bg-emerald-500 transition">Save Configuration</button>
-        <button onclick="resetAdminConfig()" class="w-full bg-slate-700 text-smg_cream py-2 rounded text-sm hover:bg-slate-600 transition">Reset to Defaults</button>
+        <button onclick="saveAdminConfig()" class="w-full bg-emerald-600 text-white py-2 rounded font-bold text-sm hover:bg-emerald-500 transition" data-i18n="save_configuration">Save Configuration</button>
+        <button onclick="resetAdminConfig()" class="w-full bg-slate-700 text-smg_cream py-2 rounded text-sm hover:bg-slate-600 transition" data-i18n="reset_to_defaults">Reset to Defaults</button>
       </div>
     </div>
   </div>
@@ -77,15 +77,15 @@
     <!-- ===== HEADER ===== -->
     <header class="border-b border-smg_cream/20 pb-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 no-print">
       <div>
-        <h1 class="text-2xl font-bold text-smg_cream tracking-wide">SMGTEC SL</h1>
-        <p class="text-xs text-smg_gold uppercase tracking-widest font-semibold">Barcelona — Internal CPQ Engine</p>
+        <h1 class="text-2xl font-bold text-smg_cream tracking-wide" data-i18n="smgtec_sl">SMGTEC SL</h1>
+        <p class="text-xs text-smg_gold uppercase tracking-widest font-semibold" data-i18n="barcelona_internal_cpq_engine">Barcelona — Internal CPQ Engine</p>
       </div>
       <div class="flex items-center gap-3 text-xs">
         <span class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg">
-          Labor: <strong class="text-smg_gold" id="headerLaborRate">€40.00</strong> / <span id="headerLaborRetail">€100.00</span> hr
+          Labor: <strong class="text-smg_gold" id="headerLaborRate" data-i18n="40_00">€40.00</strong> / <span id="headerLaborRetail" data-i18n="100_00">€100.00</span> hr
         </span>
-        <button onclick="openAdmin()" class="bg-smg_dark border border-smg_gold/40 text-smg_gold px-3 py-1.5 rounded-lg hover:bg-smg_gold/10 transition text-xs uppercase tracking-wider font-bold">Admin DB</button>
-        <button onclick="generatePDF()" class="bg-smg_gold text-smg_dark px-3 py-1.5 rounded-lg font-bold hover:bg-yellow-400 transition text-xs uppercase tracking-wider">PDF Quote</button>
+        <button onclick="openAdmin()" class="bg-smg_dark border border-smg_gold/40 text-smg_gold px-3 py-1.5 rounded-lg hover:bg-smg_gold/10 transition text-xs uppercase tracking-wider font-bold" data-i18n="admin_db">Admin DB</button>
+        <button onclick="generatePDF()" class="bg-smg_gold text-smg_dark px-3 py-1.5 rounded-lg font-bold hover:bg-yellow-400 transition text-xs uppercase tracking-wider" data-i18n="pdf_quote">PDF Quote</button>
         <button onclick="sendQuoteEmail()" class="bg-smg_dark border border-smg_gold/40 text-smg_gold px-3 py-1.5 rounded-lg font-bold hover:bg-smg_gold/10 transition text-xs uppercase tracking-wider" data-i18n="send_quote">Send Quote</button>
         <button onclick="document.getElementById('userManual').scrollIntoView({behavior:'smooth'})" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg hover:bg-smg_cream/10 transition text-xs uppercase tracking-wider font-bold" data-i18n="manual">Manual</button>
         <button onclick="setLang(LANG.current === 'en' ? 'es' : 'en')" class="bg-smg_dark border border-smg_gold/40 text-smg_gold px-3 py-1.5 rounded-lg hover:bg-smg_gold/10 transition text-xs uppercase tracking-wider font-bold min-w-[40px]" id="langToggle">EN</button>
@@ -94,23 +94,23 @@
 
     <!-- ===== CLIENT INFO BAR ===== -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-2 no-print">
-      <div class="md:col-span-2"><label class="text-[10px] uppercase text-smg_cream/60 font-bold">Client Name / Company</label><input id="clientName" placeholder="e.g. BCN Legal Solutions, SL" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
-      <div><label class="text-[10px] uppercase text-smg_cream/60 font-bold">NIF / CIF</label><input id="clientNIF" placeholder="B-12345678" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
-      <div><label class="text-[10px] uppercase text-smg_cream/60 font-bold">Quote Date</label><input id="quoteDate" type="date" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
+      <div class="md:col-span-2"><label class="text-[10px] uppercase text-smg_cream/60 font-bold" data-i18n="client_name">Client Name / Company</label><input id="clientName" placeholder="e.g. BCN Legal Solutions, SL" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
+      <div><label class="text-[10px] uppercase text-smg_cream/60 font-bold" data-i18n="nif">NIF / CIF</label><input id="clientNIF" placeholder="B-12345678" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
+      <div><label class="text-[10px] uppercase text-smg_cream/60 font-bold" data-i18n="quote_date">Quote Date</label><input id="quoteDate" type="date" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6 no-print">
-      <div><label class="text-[10px] uppercase text-smg_cream/60 font-bold">Email</label><input id="clientEmail" placeholder="admin@client.com" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
-      <div><label class="text-[10px] uppercase text-smg_cream/60 font-bold">Phone</label><input id="clientPhone" placeholder="+34 612 345 678" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
-      <div class="md:col-span-2"><label class="text-[10px] uppercase text-smg_cream/60 font-bold">Address</label><input id="clientAddress" placeholder="Carrer de la Pau, 12, 08001 Barcelona" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
+      <div><label class="text-[10px] uppercase text-smg_cream/60 font-bold" data-i18n="email">Email</label><input id="clientEmail" placeholder="admin@client.com" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
+      <div><label class="text-[10px] uppercase text-smg_cream/60 font-bold" data-i18n="phone">Phone</label><input id="clientPhone" placeholder="+34 612 345 678" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
+      <div class="md:col-span-2"><label class="text-[10px] uppercase text-smg_cream/60 font-bold" data-i18n="address">Address</label><input id="clientAddress" placeholder="Carrer de la Pau, 12, 08001 Barcelona" class="w-full bg-smg_dark/80 border border-smg_cream/20 rounded px-3 py-2 text-white text-sm focus:border-smg_gold focus:outline-none"></div>
     </div>
 
     <!-- ===== ACTION BUTTONS ===== -->
     <div class="flex flex-wrap gap-2 mb-6 no-print">
-      <button onclick="saveProposal()" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg text-xs hover:bg-smg_cream/10 transition">💾 Save Proposal</button>
-      <button onclick="loadProposal()" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg text-xs hover:bg-smg_cream/10 transition">📂 Load Proposal</button>
-      <button onclick="exportJSON()" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg text-xs hover:bg-smg_cream/10 transition">📥 Export JSON</button>
-      <button onclick="copyShareLink()" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg text-xs hover:bg-smg_cream/10 transition">🔗 Share Link</button>
-      <button onclick="resetQuoteItems()" class="bg-red-900/30 border border-red-500/40 text-red-300 px-3 py-1.5 rounded-lg text-xs hover:bg-red-900/50 transition">↺ Reset Items</button>
+      <button onclick="saveProposal()" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg text-xs hover:bg-smg_cream/10 transition" data-i18n="save">💾 Save Proposal</button>
+      <button onclick="loadProposal()" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg text-xs hover:bg-smg_cream/10 transition" data-i18n="load">📂 Load Proposal</button>
+      <button onclick="exportJSON()" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg text-xs hover:bg-smg_cream/10 transition" data-i18n="export">📥 Export JSON</button>
+      <button onclick="copyShareLink()" class="bg-smg_dark border border-smg_cream/30 text-smg_cream px-3 py-1.5 rounded-lg text-xs hover:bg-smg_cream/10 transition" data-i18n="share">🔗 Share Link</button>
+      <button onclick="resetQuoteItems()" class="bg-red-900/30 border border-red-500/40 text-red-300 px-3 py-1.5 rounded-lg text-xs hover:bg-red-900/50 transition" data-i18n="reset">↺ Reset Items</button>
       <span id="approvalBadge" class="hidden px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider"></span>
     </div>
 
@@ -143,7 +143,7 @@
           </select>
           <input type="number" id="discountPct" value="0" min="0" max="100" step="1" class="w-16 bg-smg_dark/80 border border-smg_cream/20 rounded px-2 py-1.5 text-white text-xs focus:border-smg_gold focus:outline-none">
           <span class="text-[10px] text-smg_cream/50">%</span>
-          <button onclick="applyDiscount()" class="bg-smg_dark border border-smg_gold/30 text-smg_gold px-2 py-1.5 rounded text-[10px] hover:bg-smg_gold/10 transition">Apply</button>
+          <button onclick="applyDiscount()" class="bg-smg_dark border border-smg_gold/30 text-smg_gold px-2 py-1.5 rounded text-[10px] hover:bg-smg_gold/10 transition" data-i18n="apply">Apply</button>
         </div>
       </div>
     </div>
@@ -165,15 +165,15 @@
         <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-4">
           <h2 class="text-sm font-bold text-smg_cream border-b border-smg_cream/10 pb-2 mb-3 flex items-center gap-2">
             <span class="text-smg_gold text-xs">01.</span> Client Infrastructure
-            <button onclick="quickAddItem('Infra')" class="ml-auto text-[9px] text-smg_gold border border-smg_gold/30 rounded px-1.5 py-0.5 hover:bg-smg_gold/10 transition font-semibold">+ Item</button>
+            <button onclick="quickAddItem('Infra')" class="ml-auto text-[9px] text-smg_gold border border-smg_gold/30 rounded px-1.5 py-0.5 hover:bg-smg_gold/10 transition font-semibold" data-i18n="item">+ Item</button>
           </h2>
           <div class="grid grid-cols-2 gap-3">
-            <div><label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1">Desktop Workstations</label><input type="number" id="input_desktops" value="5" min="0" class="w-full bg-slate-800 border border-smg_cream/30 rounded px-3 py-2 text-white focus:outline-none focus:border-smg_gold"></div>
-            <div><label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1">Laptop Workstations</label><input type="number" id="input_laptops" value="0" min="0" class="w-full bg-slate-800 border border-smg_cream/30 rounded px-3 py-2 text-white focus:outline-none focus:border-smg_gold"></div>
+            <div><label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1" data-i18n="desktops">Desktop Workstations</label><input type="number" id="input_desktops" value="5" min="0" class="w-full bg-slate-800 border border-smg_cream/30 rounded px-3 py-2 text-white focus:outline-none focus:border-smg_gold"></div>
+            <div><label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1" data-i18n="laptops">Laptop Workstations</label><input type="number" id="input_laptops" value="0" min="0" class="w-full bg-slate-800 border border-smg_cream/30 rounded px-3 py-2 text-white focus:outline-none focus:border-smg_gold"></div>
           </div>
           <!-- Server Assessment -->
           <div class="mt-3 pt-3 border-t border-smg_cream/10">
-            <label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1">Server Assessment</label>
+            <label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1" data-i18n="server_assessment">Server Assessment</label>
             <select id="serverAssessment" class="w-full bg-slate-800 border border-smg_cream/30 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-smg_gold">
               <option value="buy">Buy New Server (Recommended)</option>
               <option value="retain">Retain Existing Server</option>
@@ -181,15 +181,15 @@
             </select>
             <div id="retainWarning" class="hidden mt-2 bg-red-900/30 border border-red-500/30 rounded p-2 text-xs text-red-300 flex items-center gap-2">
               <span>⚠️</span>
-              <span id="warrantyText">Expired warranty detected — recommend hardware refresh or Dell ProSupport extension.</span>
+              <span id="warrantyText" data-i18n="expired_warranty_detected_recommend">Expired warranty detected — recommend hardware refresh or Dell ProSupport extension.</span>
             </div>
             <div class="mt-2 flex items-center gap-2">
               <input type="checkbox" id="expiredWarranty" class="w-3.5 h-3.5 text-smg_gold bg-slate-800 border-smg_cream/30 rounded focus:ring-smg_gold">
-              <label class="text-[10px] text-smg_cream/60">Expired Warranty / EOL Hardware</label>
+              <label class="text-[10px] text-smg_cream/60" data-i18n="expired_warranty_eol_hardware">Expired Warranty / EOL Hardware</label>
             </div>
             <div class="mt-2 grid grid-cols-2 gap-2">
-              <div><label class="text-[10px] text-smg_cream/60">Override Server Count</label><input type="number" id="input_servers" value="0" min="0" placeholder="Auto" class="w-full bg-slate-800 border border-smg_cream/20 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-smg_gold"></div>
-              <div><label class="text-[10px] text-smg_cream/60">Existing Workstations</label><input type="number" id="input_existing" value="0" min="0" placeholder="0 if new" class="w-full bg-slate-800 border border-smg_cream/20 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-smg_gold"></div>
+              <div><label class="text-[10px] text-smg_cream/60" data-i18n="override_server_count">Override Server Count</label><input type="number" id="input_servers" value="0" min="0" placeholder="Auto" class="w-full bg-slate-800 border border-smg_cream/20 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-smg_gold"></div>
+              <div><label class="text-[10px] text-smg_cream/60" data-i18n="existing_workstations">Existing Workstations</label><input type="number" id="input_existing" value="0" min="0" placeholder="0 if new" class="w-full bg-slate-800 border border-smg_cream/20 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-smg_gold"></div>
             </div>
           </div>
         </div>
@@ -197,16 +197,16 @@
         <!-- CARD: Compliance & Tax -->
         <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-4">
           <h2 class="text-sm font-bold text-smg_cream border-b border-smg_cream/10 pb-2 mb-3 flex items-center gap-2">
-            <span class="text-smg_gold text-xs">02.</span> Compliance & Taxation <span class="text-[10px] text-emerald-400 font-normal ml-auto">Regulatory Moat</span>
-            <button onclick="quickAddItem('Compliance')" class="text-[9px] text-smg_gold border border-smg_gold/30 rounded px-1.5 py-0.5 hover:bg-smg_gold/10 transition font-semibold">+ Item</button>
+            <span class="text-smg_gold text-xs">02.</span> Compliance & Taxation <span class="text-[10px] text-emerald-400 font-normal ml-auto" data-i18n="regulatory_moat">Regulatory Moat</span>
+            <button onclick="quickAddItem('Compliance')" class="text-[9px] text-smg_gold border border-smg_gold/30 rounded px-1.5 py-0.5 hover:bg-smg_gold/10 transition font-semibold" data-i18n="item">+ Item</button>
           </h2>
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <label class="text-xs text-smg_cream/80">RGPD / LOPDGDD Sensitive Data</label>
+              <label class="text-xs text-smg_cream/80" data-i18n="rgpd_lopdgdd_sensitive_data">RGPD / LOPDGDD Sensitive Data</label>
               <input type="checkbox" id="rgpdToggle" class="w-4 h-4 text-smg_gold bg-slate-800 border-smg_cream/30 rounded focus:ring-smg_gold">
             </div>
             <div>
-              <label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1">NIS2 Critical Sector</label>
+              <label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1" data-i18n="nis2_critical_sector">NIS2 Critical Sector</label>
               <select id="nis2Sector" class="w-full bg-slate-800 border border-smg_cream/30 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-smg_gold">
                 <option value="">None (Standard)</option>
                 <option value="energy">Energy</option>
@@ -220,7 +220,7 @@
               </select>
             </div>
             <div>
-              <label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1">IVA (VAT) Rate</label>
+              <label class="block text-[10px] uppercase tracking-wider text-smg_cream/70 mb-1" data-i18n="iva_vat_rate">IVA (VAT) Rate</label>
               <select id="ivaRate" class="w-full bg-slate-800 border border-smg_cream/30 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-smg_gold">
                 <option value="1.21">21% IVA (Standard)</option>
                 <option value="1.10">10% IVA (Reduced)</option>
@@ -234,11 +234,11 @@
         <div class="bg-smg_dark/80 border border-smg_cream/20 rounded-xl p-4">
           <h2 class="text-sm font-bold text-smg_cream border-b border-smg_cream/10 pb-2 mb-3 flex items-center gap-2">
             <span class="text-smg_gold text-xs">03.</span> Licensing & Sourcing
-            <button onclick="quickAddItem('Licensing')" class="ml-auto text-[9px] text-smg_gold border border-smg_gold/30 rounded px-1.5 py-0.5 hover:bg-smg_gold/10 transition font-semibold">+ Item</button>
+            <button onclick="quickAddItem('Licensing')" class="ml-auto text-[9px] text-smg_gold border border-smg_gold/30 rounded px-1.5 py-0.5 hover:bg-smg_gold/10 transition font-semibold" data-i18n="item">+ Item</button>
           </h2>
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <label class="text-xs text-smg_cream/80">SMGTEC Sourced M365</label>
+              <label class="text-xs text-smg_cream/80" data-i18n="smgtec_sourced_m365">SMGTEC Sourced M365</label>
               <input type="checkbox" id="input_m365_toggle" class="w-4 h-4 text-smg_gold bg-slate-800 border-smg_cream/30 rounded focus:ring-smg_gold">
             </div>
             <div id="m365_type_container" class="hidden">
@@ -248,12 +248,12 @@
               </select>
             </div>
             <div class="pt-2 border-t border-smg_cream/10 flex items-center justify-between">
-              <label class="text-xs text-smg_cream/80">Dropsuite M365 Backup</label>
+              <label class="text-xs text-smg_cream/80" data-i18n="dropsuite_m365_backup">Dropsuite M365 Backup</label>
               <input type="checkbox" id="dropsuiteToggle" class="w-4 h-4 text-smg_gold bg-slate-800 border-smg_cream/30 rounded focus:ring-smg_gold">
             </div>
             <div class="pt-2 border-t border-smg_cream/10">
               <div class="flex items-center justify-between">
-                <label class="text-xs text-smg_cream/80">SMGTEC Sourced VoIP (3CX)</label>
+                <label class="text-xs text-smg_cream/80" data-i18n="smgtec_sourced_voip_3cx">SMGTEC Sourced VoIP (3CX)</label>
                 <input type="checkbox" id="input_voip_toggle" class="w-4 h-4 text-smg_gold bg-slate-800 border-smg_cream/30 rounded focus:ring-smg_gold">
               </div>
               <div id="voip_users_container" class="hidden mt-2">
@@ -282,8 +282,8 @@
           <div class="mt-2 flex gap-2">
             <input id="customQty" type="number" value="1" min="1" placeholder="Qty" class="w-16 bg-slate-800 border border-smg_cream/20 rounded px-2 py-1.5 text-white text-xs">
             <input id="customTier" type="number" value="3" min="1" max="3" placeholder="Tier" class="w-16 bg-slate-800 border border-smg_cream/20 rounded px-2 py-1.5 text-white text-xs">
-            <button onclick="addCustomItem()" class="bg-smg_gold text-smg_dark px-3 py-1.5 rounded font-bold text-xs hover:bg-yellow-400 transition">+ Add Item</button>
-            <span id="customCount" class="text-[10px] text-smg_cream/50 self-center ml-auto">0 custom items</span>
+            <button onclick="addCustomItem()" class="bg-smg_gold text-smg_dark px-3 py-1.5 rounded font-bold text-xs hover:bg-yellow-400 transition" data-i18n="add_item">+ Add Item</button>
+            <span id="customCount" class="text-[10px] text-smg_cream/50 self-center ml-auto" data-i18n="custom_items">0 custom items</span>
           </div>
           <div id="customItemsList" class="mt-2 space-y-1 max-h-24 overflow-y-auto"></div>
         </div>
@@ -293,7 +293,7 @@
           <h2 class="text-sm font-bold text-smg_cream border-b border-smg_cream/10 pb-2 mb-3 flex items-center gap-2">
             <span class="text-smg_gold text-xs">05.</span> Line-Item Pricing Overrides
           </h2>
-          <div class="text-[10px] text-smg_cream/50 mb-2">Click any value to override catalog pricing for this quote</div>
+          <div class="text-[10px] text-smg_cream/50 mb-2" data-i18n="click_any_value_to_override_catalog">Click any value to override catalog pricing for this quote</div>
           <div id="lineItemGrid" class="space-y-1 max-h-80 overflow-y-auto pr-1"></div>
         </div>
 
@@ -307,19 +307,19 @@
         <!-- MIN BILLING WARNING -->
         <div id="minimum_billing_warning" class="hidden bg-amber-500/20 border border-amber-500/40 rounded-xl p-3 text-xs text-smg_gold font-semibold flex items-center gap-3 no-print">
           <span>⚠️</span>
-          <span>Account falls below 10-user threshold. <strong>10-Workstation Minimum Billing</strong> applied to standard monthly package calculations.</span>
+          <span>Account falls below 10-user threshold. <strong data-i18n="workstation_minimum_billing">10-Workstation Minimum Billing</strong> applied to standard monthly package calculations.</span>
         </div>
 
         <!-- NIS2 COMPLIANCE WARNING -->
         <div id="nis2Warning" class="hidden bg-red-900/30 border border-red-500/40 rounded-xl p-3 text-xs text-red-300 font-semibold flex items-center gap-3 no-print">
           <span>🛡️</span>
-          <span>NIS2 Critical Sector selected — <strong>Tier 1 is disabled</strong> (insufficient security). Tier 3 upgraded with SentinelOne + MDR threat hunting.</span>
+          <span>NIS2 Critical Sector selected — <strong data-i18n="tier_1_is_disabled">Tier 1 is disabled</strong> (insufficient security). Tier 3 upgraded with SentinelOne + MDR threat hunting.</span>
         </div>
 
         <!-- EXPIRED WARRANTY BANNER -->
         <div id="warrantyBanner" class="hidden bg-red-900/30 border border-red-500/40 rounded-xl p-3 text-xs text-red-300 font-semibold flex items-center gap-3 no-print">
           <span>⚠️</span>
-          <span id="warrantyBannerText">Expired warranty detected on retained server hardware. Recommend immediate Dell ProSupport extension or hardware refresh.</span>
+          <span id="warrantyBannerText" data-i18n="expired_warranty_detected_on_retain">Expired warranty detected on retained server hardware. Recommend immediate Dell ProSupport extension or hardware refresh.</span>
         </div>
 
         <!-- 3-TIER DASHBOARD -->
@@ -327,32 +327,32 @@
 
         <!-- COMPLIANCE & RISK SUMMARY -->
         <div class="bg-slate-800 border border-smg_cream/15 rounded-xl p-4 no-print">
-          <h3 class="text-xs font-bold text-smg_cream uppercase tracking-wider mb-3 border-b border-smg_cream/10 pb-2">HQ Risk Review & Financial Guardrails</h3>
+          <h3 class="text-xs font-bold text-smg_cream uppercase tracking-wider mb-3 border-b border-smg_cream/10 pb-2" data-i18n="hq_risk_review_financial_guardrails">HQ Risk Review & Financial Guardrails</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div class="space-y-1">
-              <h4 class="font-bold text-smg_gold uppercase tracking-wider text-[10px]">Upfront Deposit (Spanish Law)</h4>
-              <p class="text-slate-400">50% hardware deposit due on signature, 50% on delivery</p>
+              <h4 class="font-bold text-smg_gold uppercase tracking-wider text-[10px]" data-i18n="upfront_deposit_spanish_law">Upfront Deposit (Spanish Law)</h4>
+              <p class="text-slate-400" data-i18n="hardware_deposit_due_on_signature_5">50% hardware deposit due on signature, 50% on delivery</p>
               <ul class="text-slate-500 space-y-0.5">
-                <li>Tier 1: <strong id="deposit_t1" class="text-slate-200">€0.00</strong></li>
-                <li>Tier 2: <strong id="deposit_t2" class="text-slate-200">€0.00</strong></li>
-                <li>Tier 3: <strong id="deposit_t3" class="text-slate-200">€0.00</strong></li>
+                <li>Tier 1: <strong id="deposit_t1" class="text-slate-200" data-i18n="0_00">€0.00</strong></li>
+                <li>Tier 2: <strong id="deposit_t2" class="text-slate-200" data-i18n="0_00">€0.00</strong></li>
+                <li>Tier 3: <strong id="deposit_t3" class="text-slate-200" data-i18n="0_00">€0.00</strong></li>
               </ul>
             </div>
             <div class="space-y-1">
-              <h4 class="font-bold text-red-400 uppercase tracking-wider text-[10px]">SLA Penalty Exposure</h4>
+              <h4 class="font-bold text-red-400 uppercase tracking-wider text-[10px]" data-i18n="sla_penalty_exposure">SLA Penalty Exposure</h4>
               <ul class="text-slate-500 space-y-0.5">
-                <li>Tier 1: <strong class="text-slate-200">€0.00</strong> (no SLA)</li>
-                <li>Tier 2: <strong id="sla_t2" class="text-slate-200">€0.00</strong> (10%)</li>
-                <li>Tier 3: <strong id="sla_t3" class="text-slate-200">€0.00</strong> (15%)</li>
+                <li>Tier 1: <strong class="text-slate-200" data-i18n="0_00">€0.00</strong> (no SLA)</li>
+                <li>Tier 2: <strong id="sla_t2" class="text-slate-200" data-i18n="0_00">€0.00</strong> (10%)</li>
+                <li>Tier 3: <strong id="sla_t3" class="text-slate-200" data-i18n="0_00">€0.00</strong> (15%)</li>
               </ul>
-              <p class="text-slate-600 text-[9px] italic">Max penalty per breach event, 2 events per month cap</p>
+              <p class="text-slate-600 text-[9px] italic" data-i18n="max_penalty_per_breach_event_2_even">Max penalty per breach event, 2 events per month cap</p>
             </div>
             <div class="space-y-1">
-              <h4 class="font-bold text-smg_cream uppercase tracking-wider text-[10px]">Contract Terms</h4>
+              <h4 class="font-bold text-smg_cream uppercase tracking-wider text-[10px]" data-i18n="contract_terms">Contract Terms</h4>
               <ul class="text-slate-500 space-y-0.5">
-                <li>Late Payment: <strong class="text-slate-200">1.5% monthly</strong></li>
-                <li>Min Term: <strong class="text-slate-200">12 months</strong></li>
-                <li>Early Exit: <strong class="text-slate-200">50% of remaining contract value</strong></li>
+                <li>Late Payment: <strong class="text-slate-200" data-i18n="monthly">1.5% monthly</strong></li>
+                <li>Min Term: <strong class="text-slate-200" data-i18n="contract_12">12 months</strong></li>
+                <li>Early Exit: <strong class="text-slate-200" data-i18n="of_remaining_contract">50% of remaining contract value</strong></li>
               </ul>
             </div>
           </div>
@@ -401,7 +401,7 @@
   };
 
   // =====================================================================
-  // 2. I18N — Spanish / English
+  // 2. I18N — Spanish / English — Initialize
   // =====================================================================
   const LANG = { current: localStorage.getItem('smgtec_lang') || 'es' };
   const _t = {
@@ -484,7 +484,58 @@
     'contract_12': { en: '12 months', es: '12 meses' },
     'contract_24': { en: '24 months', es: '24 meses' },
     'contract_36': { en: '36 months', es: '36 meses' },
-    'pct_yr': { en: '% / yr', es: '% / año' }
+    'pct_yr': { en: '% / yr', es: '% / año' },
+    'add': { en: '+ Add', es: '+ Añadir' },
+    'add_item': { en: '+ Add Item', es: '+ Añadir artículo' },
+    'admin_sourcing_database': { en: 'Admin — Sourcing Database', es: 'Admin — Base de datos' },
+    'barcelona_internal_cpq_engine': { en: 'Barcelona — Internal CPQ Engine', es: 'Barcelona — Motor CPQ Interno' },
+    'blocked_by_nis2_compliance_policy_u': { en: '⛔ Blocked by NIS2 compliance policy — upgrade to Tier 2+', es: '⛔ Bloqueado por NIS2 — actualice al Nivel 2+' },
+    'click_any_value_to_override_catalog': { en: 'Click any value to override catalog pricing for this quote', es: 'Haga clic para sobrescribir el precio del catálogo' },
+    'contract_terms': { en: 'Contract Terms', es: 'Términos del contrato' },
+    'custom_items': { en: '0 custom items', es: '0 artículos personalizados' },
+    'dropsuite_m365_backup': { en: 'Dropsuite M365 Backup', es: 'Copia seguridad Dropsuite M365' },
+    'enter_admin_password_to_edit_sourci': { en: 'Enter admin password to edit sourcing data', es: 'Introduzca la contraseña de admin' },
+    'excl_licenses': { en: '(excl. licenses)', es: '(excl. licencias)' },
+    'existing_workstations': { en: 'Existing Workstations', es: 'Puestos existentes' },
+    'expired_warranty_detected_on_retain': { en: 'Expired warranty detected on retained server hardware. Recommend immediate Dell ProSupport extension or hardware refresh.', es: 'Garantía caducada detectada en servidor retenido. Se recomienda extensión Dell ProSupport.' },
+    'expired_warranty_detected_recommend': { en: 'Expired warranty detected — recommend hardware refresh or Dell ProSupport extension.', es: 'Garantía caducada — recomendar renovación HW o extensión ProSupport.' },
+    'expired_warranty_eol_hardware': { en: 'Expired Warranty / EOL Hardware', es: 'Garantía caducada / HW fin de vida' },
+    'hardware_costs': { en: 'Hardware Costs', es: 'Costes de hardware' },
+    'hardware_deposit_due_on_signature_5': { en: '50% hardware deposit due on signature, 50% on delivery', es: '50% depósito hardware al firmar, 50% a la entrega' },
+    'hq_risk_review_financial_guardrails': { en: 'HQ Risk Review & Financial Guardrails', es: 'Revisión de riesgos y salvaguardas financieras' },
+    'incorrect_password': { en: 'Incorrect password', es: 'Contraseña incorrecta' },
+    'item': { en: 'Item', es: 'Artículo' },
+    'iva_vat_rate': { en: 'IVA (VAT) Rate', es: 'Tipo de IVA' },
+    'labor_rates_hr': { en: 'Labor Rates (€/hr)', es: 'Tarifas de mano de obra (€/h)' },
+    'max_penalty_per_breach_event_2_even': { en: 'Max penalty per breach event, 2 events per month cap', es: 'Penalización máxima por incumplimiento, 2 eventos/mes' },
+    'minimum_security_standard_not_met': { en: 'Minimum security standard not met', es: 'Estándar mínimo de seguridad no cumplido' },
+    'nis2_critical_sector': { en: 'NIS2 Critical Sector', es: 'Sector crítico NIS2' },
+    'nis2_critical_sector_tier_1_non_com': { en: 'NIS2 Critical Sector — Tier 1 non-compliant', es: 'Sector crítico NIS2 — Nivel 1 no cumple' },
+    'no_custom_items_added_yet': { en: 'No custom items added yet.', es: 'Aún no hay artículos personalizados.' },
+    'of_remaining_contract': { en: '50% of remaining contract value', es: '50% del valor restante del contrato' },
+    'override_server_count': { en: 'Override Server Count', es: 'Sobrescribir nº servidores' },
+    'price': { en: 'Price (€)', es: 'Precio (€)' },
+    'regulatory_moat': { en: 'Regulatory Moat', es: 'Foso normativo' },
+    'reset_to_defaults': { en: 'Reset to Defaults', es: 'Restablecer valores' },
+    'retail_rate': { en: 'Retail Rate', es: 'Tarifa retail' },
+    'rgpd_lopdgdd_sensitive_data': { en: 'RGPD / LOPDGDD Sensitive Data', es: 'Datos sensibles RGPD / LOPDGDD' },
+    'save_configuration': { en: 'Save Configuration', es: 'Guardar configuración' },
+    'sla_penalty_exposure': { en: 'SLA Penalty Exposure', es: 'Exposición a penalizaciones SLA' },
+    'smgtec_sl': { en: 'SMGTEC SL', es: 'SMGTEC SL' },
+    'smgtec_sourced_m365': { en: 'SMGTEC Sourced M365', es: 'M365 aprovisionado por SMGTEC' },
+    'smgtec_sourced_voip_3cx': { en: 'SMGTEC Sourced VoIP (3CX)', es: 'VoIP (3CX) aprovisionado por SMGTEC' },
+    'software_licenses_mo': { en: 'Software Licenses (€/mo)', es: 'Licencias de software (€/mes)' },
+    'tier': { en: '🗑 Tier', es: '🗑 Nivel' },
+    'tier_1_is_disabled': { en: 'Tier 1 is disabled', es: 'Nivel 1 deshabilitado' },
+    'times': { en: '&times;', es: '&times;' },
+    'unlock': { en: 'Unlock', es: 'Desbloquear' },
+    'upfront_deposit_spanish_law': { en: 'Upfront Deposit (Spanish Law)', es: 'Depósito inicial (Ley española)' },
+    'wholesale_setup_maint': { en: 'Wholesale Setup/Maint', es: 'Mayorista instalación/mto.' },
+    'workstation_minimum_billing': { en: '10-Workstation Minimum Billing', es: 'Mínimo 10 puestos de facturación' },
+    'y2': { en: 'Y2+', es: 'A2+' },
+    '0_00': { en: '€0.00', es: '€0,00' },
+    '40_00': { en: '€40.00', es: '€40,00' },
+    '100_00': { en: '€100.00', es: '€100,00' }
   };
   function __(key) { return (_t[key] && _t[key][LANG.current]) ? _t[key][LANG.current] : key; }
   function setLang(l) {
@@ -493,6 +544,7 @@
     document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = __(el.dataset.i18n); });
     const lt = document.getElementById('langToggle');
     if (lt) lt.textContent = LANG.current === 'en' ? 'ES' : 'EN';
+    document.title = __('app_title');
     calculateQuote();
   }
 
@@ -890,8 +942,8 @@
           <div class="bg-smg_dark border border-red-500/30 rounded-xl p-5 flex flex-col items-center justify-center text-center opacity-60">
             <span class="text-2xl mb-2">🛡️</span>
             <h3 class="text-sm font-bold text-red-400">${tier.name}</h3>
-            <p class="text-[10px] text-slate-500 mt-1">NIS2 Critical Sector — Tier 1 non-compliant</p>
-            <p class="text-[10px] text-slate-600">Minimum security standard not met</p>
+            <p class="text-[10px] text-slate-500 mt-1" data-i18n="nis2_critical_sector_tier_1_non_com">NIS2 Critical Sector — Tier 1 non-compliant</p>
+            <p class="text-[10px] text-slate-600" data-i18n="minimum_security_standard_not_met">Minimum security standard not met</p>
           </div>`;
         return;
       }
@@ -921,12 +973,12 @@
 
             <!-- ====== ONE-TIME SETUP ====== -->
             <div>
-              <h4 class="font-bold text-smg_cream uppercase tracking-wider mb-2 text-[10px] border-b border-slate-700/30 pb-1">One-Time Setup</h4>
+              <h4 class="font-bold text-smg_cream uppercase tracking-wider mb-2 text-[10px] border-b border-slate-700/30 pb-1" data-i18n="one_time_setup">One-Time Setup</h4>
               <!-- Header row -->
               <div class="grid grid-cols-4 gap-2 mb-1">
-                <div><span class="text-[8px] uppercase text-slate-500 font-semibold">Charge</span></div>
-                <div><span class="text-[8px] uppercase text-slate-500 font-semibold">Cost</span></div>
-                <div class="col-span-2"><span class="text-[8px] uppercase text-slate-500 font-semibold">Profit / Margin</span></div>
+                <div><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="charge">Charge</span></div>
+                <div><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="cost">Cost</span></div>
+                <div class="col-span-2"><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="profit_margin">Profit / Margin</span></div>
               </div>
               <!-- Value row -->
               <div class="grid grid-cols-4 gap-2 bg-slate-800/60 rounded-lg px-2 py-1.5 items-center">
@@ -942,13 +994,13 @@
 
             <!-- ====== MONTHLY ====== -->
             <div>
-              <h4 class="font-bold text-smg_cream uppercase tracking-wider mb-2 text-[10px] border-b border-slate-700/30 pb-1">Monthly Recurring</h4>
+              <h4 class="font-bold text-smg_cream uppercase tracking-wider mb-2 text-[10px] border-b border-slate-700/30 pb-1" data-i18n="monthly_recurring">Monthly Recurring</h4>
               <!-- Header row -->
               <div class="grid grid-cols-4 gap-2 mb-1">
-                <div><span class="text-[8px] uppercase text-slate-500 font-semibold">Year</span></div>
-                <div><span class="text-[8px] uppercase text-slate-500 font-semibold">Revenue</span></div>
-                <div><span class="text-[8px] uppercase text-slate-500 font-semibold">Cost</span></div>
-                <div><span class="text-[8px] uppercase text-slate-500 font-semibold">Profit / Margin</span></div>
+                <div><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="year">Year</span></div>
+                <div><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="revenue">Revenue</span></div>
+                <div><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="cost">Cost</span></div>
+                <div><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="profit_margin">Profit / Margin</span></div>
               </div>
               <!-- Y1 -->
               <div class="grid grid-cols-4 gap-2 bg-slate-800/60 rounded-lg px-2 py-1.5 items-center mb-1">
@@ -959,7 +1011,7 @@
               </div>
               <!-- Y2+ -->
               <div class="grid grid-cols-4 gap-2 bg-slate-800/40 rounded-lg px-2 py-1.5 items-center">
-                <div><span class="text-smg_gold font-semibold text-[11px]">Y2+</span></div>
+                <div><span class="text-smg_gold font-semibold text-[11px]" data-i18n="y2">Y2+</span></div>
                 <div><strong>€${tier.monthlyRev.toFixed(2)}</strong></div>
                 <div><span class="text-slate-400">€${tier.monthlyCostY2.toFixed(2)}</span></div>
                 <div><span class="font-semibold ${m2Pct}">€${tier.mProfitY2.toFixed(2)} (${tier.mMarginY2.toFixed(1)}%)</span></div>
@@ -969,18 +1021,18 @@
                 <span>SLA exposure: <strong class="text-slate-300">€${tier.sla.toFixed(2)}</strong>/event</span>
               </div>
               <div class="flex justify-between text-[8px] text-slate-600 mt-0.5 pt-0.5 border-t border-slate-700/20">
-                <span>Services margin<span class="text-slate-700"> (excl. licenses)</span>: <strong class="${svcPct}">${tier.svcMarginY1.toFixed(1)}%</strong></span>
+                <span>Services margin<span class="text-slate-700" data-i18n="excl_licenses"> (excl. licenses)</span>: <strong class="${svcPct}">${tier.svcMarginY1.toFixed(1)}%</strong></span>
                 <span>Blended: <span class="text-slate-500">${tier.mMarginY1.toFixed(1)}%</span></span>
               </div>
 
             <!-- ====== YEAR 1 AGGREGATE ====== -->
             <div>
-              <h4 class="font-bold text-smg_cream uppercase tracking-wider mb-2 text-[10px] border-b border-slate-700/30 pb-1">Year 1 Aggregate</h4>
+              <h4 class="font-bold text-smg_cream uppercase tracking-wider mb-2 text-[10px] border-b border-slate-700/30 pb-1" data-i18n="year_1_aggregate">Year 1 Aggregate</h4>
               <!-- Header -->
               <div class="grid grid-cols-4 gap-2 mb-1">
-                <div><span class="text-[8px] uppercase text-slate-500 font-semibold">Revenue</span></div>
-                <div><span class="text-[8px] uppercase text-slate-500 font-semibold">Cost</span></div>
-                <div class="col-span-2"><span class="text-[8px] uppercase text-slate-500 font-semibold">Profit / Margin</span></div>
+                <div><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="revenue">Revenue</span></div>
+                <div><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="cost">Cost</span></div>
+                <div class="col-span-2"><span class="text-[8px] uppercase text-slate-500 font-semibold" data-i18n="profit_margin">Profit / Margin</span></div>
               </div>
               <!-- Values -->
               <div class="grid grid-cols-4 gap-2 bg-slate-800/60 rounded-lg px-2 py-1.5 items-center mb-2">
@@ -1002,7 +1054,7 @@
               </div>
             </div>
 
-            ${tier.nis2blocked ? '<div class="text-[9px] text-red-400 font-semibold pt-1 border-t border-red-500/20 flex items-center gap-1">⛔ Blocked by NIS2 compliance policy — upgrade to Tier 2+</div>' : ''}
+            ${tier.nis2blocked ? '<div class="text-[9px] text-red-400 font-semibold pt-1 border-t border-red-500/20 flex items-center gap-1" data-i18n="blocked_by_nis2_compliance_policy_u">⛔ Blocked by NIS2 compliance policy — upgrade to Tier 2+</div>' : ''}
           </div>
         </div>`;
     });
@@ -1014,9 +1066,9 @@
   function renderLineItems(tiers) {
     const grid = document.getElementById('lineItemGrid');
     let gridHtml = `<div class="grid grid-cols-[2fr_1fr_1fr_auto] gap-1 text-[8px] uppercase tracking-wider text-slate-500 font-bold pb-1 mb-1 border-b border-slate-700/30">
-      <span>Item</span>
-      <span>Cost (€)</span>
-      <span>Price (€)</span>
+      <span data-i18n="item">Item</span>
+      <span data-i18n="cost">Cost (€)</span>
+      <span data-i18n="price">Price (€)</span>
       <span></span>
     </div>`;
 
@@ -1076,11 +1128,11 @@
         `<option value="sw_${k}">SW: ${k}</option>`
       )).join('');
       html += `<div class="flex items-center gap-1 mt-2 pt-1 border-t border-smg_cream/10 text-[9px]">
-        <button onclick="removeTierItem(${tierNum},'all')" class="text-red-400 hover:text-red-300 px-1 py-0.5 rounded hover:bg-red-900/20 transition text-[9px]" title="Remove all items from this tier">🗑 Tier</button>
+        <button onclick="removeTierItem(${tierNum},'all')" class="text-red-400 hover:text-red-300 px-1 py-0.5 rounded hover:bg-red-900/20 transition text-[9px]" title="Remove all items from this tier" data-i18n="tier">🗑 Tier</button>
         <select id="catPicker_${tierNum}" class="bg-slate-800 border border-smg_cream/20 rounded px-1 py-0.5 text-white text-[9px] flex-1">
           ${catOpts}
         </select>
-        <button onclick="addCatalogItem(${tierNum})" class="text-smg_gold hover:text-yellow-300 px-1.5 py-0.5 rounded hover:bg-smg_gold/10 transition text-[9px] font-bold">+ Add</button>
+        <button onclick="addCatalogItem(${tierNum})" class="text-smg_gold hover:text-yellow-300 px-1.5 py-0.5 rounded hover:bg-smg_gold/10 transition text-[9px] font-bold" data-i18n="add">+ Add</button>
       </div>`;
 
       gridHtml += html;
@@ -1146,12 +1198,12 @@
     const list = document.getElementById('customItemsList');
     const count = document.getElementById('customCount');
     count.textContent = `${customItems.length} custom items`;
-    if (!customItems.length) { list.innerHTML = '<p class="text-[10px] text-slate-600 italic">No custom items added yet.</p>'; return; }
+    if (!customItems.length) { list.innerHTML = '<p class="text-[10px] text-slate-600 italic" data-i18n="no_custom_items_added_yet">No custom items added yet.</p>'; return; }
     list.innerHTML = customItems.map(i =>
       `<div class="flex justify-between items-center bg-slate-800/40 rounded px-2 py-1 text-[10px]">
         <span class="text-smg_cream/80"><strong>${i.name}</strong> (T${i.tier} ${i.phase}) ×${i.qty}</span>
         <span class="text-slate-400">C:€${(i.wholesale*i.qty).toFixed(0)} P:€${(i.retail*i.qty).toFixed(0)}</span>
-        <button onclick="removeCustomItem(${i.id})" class="text-red-400 hover:text-red-300 ml-2">&times;</button>
+        <button onclick="removeCustomItem(${i.id})" class="text-red-400 hover:text-red-300 ml-2" data-i18n="times">&times;</button>
       </div>`
     ).join('');
   }
